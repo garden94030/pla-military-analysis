@@ -28,13 +28,15 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-/* Header */
+/* Header - mobile first */
 .header {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   border-bottom: 1px solid var(--border);
-  padding: 12px 24px;
+  padding: 10px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -43,24 +45,34 @@ body {
   z-index: 1000;
 }
 .header h1 {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 600;
   background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.header .subtitle { font-size: 12px; color: var(--text-secondary); }
-.header .datetime { font-size: 13px; color: var(--accent-cyan); font-family: monospace; }
+.header .subtitle { font-size: 10px; color: var(--text-secondary); }
+.header .datetime { font-size: 11px; color: var(--accent-cyan); font-family: monospace; white-space: nowrap; }
+@media (min-width: 768px) {
+  .header { padding: 12px 24px; }
+  .header h1 { font-size: 18px; }
+  .header .subtitle { font-size: 12px; }
+  .header .datetime { font-size: 13px; }
+}
 
 /* Threat Level Banner */
 .threat-banner {
-  padding: 10px 24px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  font-size: 14px;
+  gap: 8px;
+  font-size: 12px;
   font-weight: 600;
   transition: background 0.5s;
+  flex-wrap: wrap;
+}
+@media (min-width: 768px) {
+  .threat-banner { padding: 10px 24px; gap: 16px; font-size: 14px; flex-wrap: nowrap; }
 }
 .threat-banner.GREEN { background: linear-gradient(90deg, rgba(34,197,94,0.15), transparent); color: var(--accent-green); }
 .threat-banner.YELLOW { background: linear-gradient(90deg, rgba(245,158,11,0.2), transparent); color: var(--accent-orange); }
@@ -77,71 +89,88 @@ body {
 .threat-banner.RED .threat-dot { background: var(--accent-red); }
 @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-/* Dashboard Grid */
+/* Dashboard Grid - Mobile First */
 .dashboard {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto auto;
-  gap: 16px;
-  padding: 16px 24px;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 10px;
   max-width: 1600px;
   margin: 0 auto;
 }
-@media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }
+@media (min-width: 768px) {
+  .dashboard { grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 24px; }
+}
 
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
 }
 .card-header {
-  padding: 12px 16px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
 }
-.card-header h2 { font-size: 14px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-.card-body { padding: 16px; }
+@media (min-width: 768px) { .card-header { padding: 12px 16px; align-items: center; flex-wrap: nowrap; } }
+.card-header h2 { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+@media (min-width: 768px) { .card-header h2 { font-size: 14px; letter-spacing: 1px; } }
+.card-body { padding: 12px; }
+@media (min-width: 768px) { .card-body { padding: 16px; } }
 
-/* Map */
+/* Map - full width, taller on desktop */
 .map-card { grid-column: 1 / -1; }
-#map { height: 420px; background: var(--bg-secondary); border-radius: 0 0 12px 12px; }
+#map { height: 300px; background: var(--bg-secondary); border-radius: 0 0 10px 10px; }
+@media (min-width: 768px) { #map { height: 420px; } }
+@media (min-width: 1200px) { #map { height: 500px; } }
 
-/* Stats Grid */
+/* Stats Grid - 2 cols on mobile, 4 on desktop */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
   grid-column: 1 / -1;
 }
-@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 768px) { .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; } }
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 12px 8px;
   text-align: center;
 }
-.stat-value { font-size: 32px; font-weight: 700; color: var(--accent-cyan); }
-.stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-.stat-trend { font-size: 11px; margin-top: 6px; }
+@media (min-width: 768px) { .stat-card { padding: 16px; } }
+.stat-value { font-size: 26px; font-weight: 700; color: var(--accent-cyan); }
+@media (min-width: 768px) { .stat-value { font-size: 32px; } }
+.stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; line-height: 1.3; }
+@media (min-width: 768px) { .stat-label { font-size: 12px; margin-top: 4px; } }
+.stat-trend { font-size: 10px; margin-top: 4px; }
+@media (min-width: 768px) { .stat-trend { font-size: 11px; margin-top: 6px; } }
 .stat-trend.up { color: var(--accent-red); }
 .stat-trend.down { color: var(--accent-green); }
 
 /* Event Timeline */
-.event-list { max-height: 360px; overflow-y: auto; }
+.event-list { max-height: 320px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+@media (min-width: 768px) { .event-list { max-height: 360px; } }
 .event-item {
-  padding: 10px 16px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: flex-start;
   cursor: pointer;
   transition: background 0.2s;
 }
-.event-item:hover { background: rgba(59,130,246,0.08); }
+.event-item:active { background: rgba(59,130,246,0.12); }
+@media (min-width: 768px) {
+  .event-item { padding: 10px 16px; gap: 12px; }
+  .event-item:hover { background: rgba(59,130,246,0.08); }
+}
 .event-dot {
   width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
 }
@@ -149,42 +178,86 @@ body {
 .event-dot.high { background: var(--accent-orange); }
 .event-dot.medium { background: var(--accent-blue); }
 .event-dot.low { background: var(--accent-green); }
-.event-time { font-size: 11px; color: var(--text-secondary); font-family: monospace; }
-.event-title { font-size: 13px; font-weight: 500; }
-.event-detail { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.event-time { font-size: 10px; color: var(--text-secondary); font-family: monospace; }
+@media (min-width: 768px) { .event-time { font-size: 11px; } }
+.event-title { font-size: 12px; font-weight: 500; line-height: 1.3; }
+@media (min-width: 768px) { .event-title { font-size: 13px; } }
+.event-detail { font-size: 10px; color: var(--text-secondary); margin-top: 2px; line-height: 1.3; }
+@media (min-width: 768px) { .event-detail { font-size: 11px; } }
 
-/* Chart */
-.chart-container { position: relative; height: 280px; }
+/* Chart - shorter on mobile */
+.chart-container { position: relative; height: 220px; }
+@media (min-width: 768px) { .chart-container { height: 280px; } }
 
-/* Vessel table */
-.vessel-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+/* Vessel table - horizontal scroll on mobile */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.vessel-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 420px; }
+@media (min-width: 768px) { .vessel-table { font-size: 12px; min-width: auto; } }
 .vessel-table th {
-  text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border);
-  color: var(--text-secondary); font-weight: 500; text-transform: uppercase; font-size: 11px;
+  text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--border);
+  color: var(--text-secondary); font-weight: 500; text-transform: uppercase; font-size: 10px;
+  white-space: nowrap;
 }
-.vessel-table td { padding: 8px 10px; border-bottom: 1px solid rgba(45,55,72,0.5); }
+@media (min-width: 768px) { .vessel-table th { padding: 8px 10px; font-size: 11px; } }
+.vessel-table td { padding: 8px 8px; border-bottom: 1px solid rgba(45,55,72,0.5); }
+@media (min-width: 768px) { .vessel-table td { padding: 8px 10px; } }
 .vessel-table tr:hover { background: rgba(59,130,246,0.05); }
-.vessel-status { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+.vessel-status { display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 9px; font-weight: 600; white-space: nowrap; }
+@media (min-width: 768px) { .vessel-status { padding: 2px 8px; font-size: 10px; } }
 .vessel-status.active { background: rgba(239,68,68,0.15); color: var(--accent-red); }
 .vessel-status.monitoring { background: rgba(245,158,11,0.15); color: var(--accent-orange); }
 .vessel-status.last-seen { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
 
-/* Filter Bar */
+/* Filter Bar - touch-friendly */
 .filter-bar {
-  display: flex; gap: 8px; flex-wrap: wrap;
+  display: flex; gap: 6px; flex-wrap: wrap;
 }
 .filter-btn {
-  padding: 4px 12px; border-radius: 16px; font-size: 11px; cursor: pointer;
+  padding: 6px 10px; border-radius: 16px; font-size: 11px; cursor: pointer;
   border: 1px solid var(--border); background: transparent; color: var(--text-secondary);
-  transition: all 0.2s;
+  transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
+@media (min-width: 768px) { .filter-btn { padding: 4px 12px; } }
 .filter-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
 .filter-btn.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
 
+/* Mobile vessel cards (alternative to table on very small screens) */
+.vessel-cards { display: none; }
+@media (max-width: 480px) {
+  .table-scroll { display: none; }
+  .vessel-cards { display: block; }
+  .vessel-card-item {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .vessel-card-item:active { background: rgba(59,130,246,0.08); }
+  .vc-name { font-size: 13px; font-weight: 600; }
+  .vc-sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+  .vc-right { text-align: right; }
+  .vc-days { font-size: 18px; font-weight: 700; color: var(--accent-cyan); }
+  .vc-days-label { font-size: 9px; color: var(--text-secondary); }
+}
+
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* PWA / iOS safe area */
+@supports (padding: env(safe-area-inset-top)) {
+  .header { padding-top: max(10px, env(safe-area-inset-top)); }
+}
+
+/* Landscape phone optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  #map { height: 250px; }
+  .chart-container { height: 180px; }
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
 </style>
 </head>
 <body>
@@ -280,12 +353,15 @@ body {
     <h2>追蹤中的重點船舶 (Priority Vessels)</h2>
   </div>
   <div class="card-body" style="padding:0">
-    <table class="vessel-table">
-      <thead>
-        <tr><th>船名</th><th>類型</th><th>位置</th><th>狀態</th><th>天數</th></tr>
-      </thead>
-      <tbody id="vessel-table-body"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="vessel-table">
+        <thead>
+          <tr><th>船名</th><th>類型</th><th>位置</th><th>狀態</th><th>天數</th></tr>
+        </thead>
+        <tbody id="vessel-table-body"></tbody>
+      </table>
+    </div>
+    <div class="vessel-cards" id="vessel-cards"></div>
   </div>
 </div>
 
@@ -496,8 +572,8 @@ new Chart(classCtx, {
     cutout: '55%',
     plugins: {
       legend: {
-        position: 'right',
-        labels: { color: '#94a3b8', font: {size:11}, padding: 12 }
+        position: window.innerWidth < 768 ? 'bottom' : 'right',
+        labels: { color: '#94a3b8', font: {size: window.innerWidth < 768 ? 10 : 11}, padding: window.innerWidth < 768 ? 8 : 12 }
       }
     }
   }
@@ -523,6 +599,26 @@ vessels.forEach(v => {
     <td>${v.days}d</td>
   `;
   tbody.appendChild(tr);
+});
+
+// === Mobile Vessel Cards ===
+const vcards = document.getElementById('vessel-cards');
+vessels.forEach(v => {
+  const div = document.createElement('div');
+  div.className = 'vessel-card-item';
+  const statusText = v.status === 'active' ? '活動中' : v.status === 'monitoring' ? '監控中' : '最後偵測';
+  div.innerHTML = `
+    <div>
+      <div class="vc-name">${v.name}</div>
+      <div class="vc-sub">${v.type} · <span class="vessel-status ${v.status}">${statusText}</span></div>
+      <div class="vc-sub" style="font-family:monospace">${v.loc}</div>
+    </div>
+    <div class="vc-right">
+      <div class="vc-days">${v.days}</div>
+      <div class="vc-days-label">天</div>
+    </div>
+  `;
+  vcards.appendChild(div);
 });
 
 // === Threat Level Simulation ===
