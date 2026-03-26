@@ -1,0 +1,119 @@
+{
+  "gray_zone_behavior_classes": {
+    "description": "灰色地帶行為分類框架 (基於 CSIS Signals in the Swarm 方法論)",
+    "source": "CSIS Futures Lab, October 2025",
+    "methodology": "AIS tracking + fishing effort + military drill zone correlation + AIS anomaly detection",
+    "classes": [
+      {
+        "id": "GZ-M1",
+        "name_en": "Suspected Maritime Militia",
+        "name_zh": "疑似海上民兵",
+        "description": "Chinese-flagged fishing vessels exhibiting non-fishing behavior in military drill zones",
+        "indicators": [
+          "Extended loitering in military drill zones without active fishing",
+          "Coordinated movement patterns with other vessels",
+          "Presence during military exercises (Joint Sword A/B)",
+          "Registered as fishing but no fishing effort detected (GFW data)"
+        ],
+        "csis_threshold": "Fishing vessel in drill zone >72 hours with zero fishing effort"
+      },
+      {
+        "id": "GZ-M2",
+        "name_en": "AIS Dark Vessel",
+        "name_zh": "AIS 暗船",
+        "description": "Vessels deliberately disabling AIS transponders in sensitive areas",
+        "indicators": [
+          "AIS signal disappears in Taiwan Strait or near Taiwan",
+          "Reappears at different location after gap",
+          "MMSI/identity changes between AIS sessions",
+          "Detected by Canada DVD or satellite but no AIS signal"
+        ],
+        "csis_threshold": "AIS gap >6 hours within 100nm of Taiwan"
+      },
+      {
+        "id": "GZ-M3",
+        "name_en": "CCG Gray Zone Patrol",
+        "name_zh": "海警灰色地帶巡邏",
+        "description": "China Coast Guard vessels operating in disputed or sensitive waters for coercion purposes",
+        "indicators": [
+          "Extended deployment (>30 days) in contested areas",
+          "Shadowing or blocking foreign vessels",
+          "Water cannon or close-range maneuvers",
+          "Operating inside foreign EEZ"
+        ]
+      },
+      {
+        "id": "GZ-M4",
+        "name_en": "Dual-Use Research Vessel",
+        "name_zh": "雙用途科考船",
+        "description": "State-affiliated research vessels conducting seabed mapping/sensor deployment with military application",
+        "indicators": [
+          "Lawn-mower survey pattern in sensitive waters",
+          "Operating near submarine transit routes",
+          "Deploying underwater sensors/buoys",
+          "Affiliated with institutions linked to PLA Navy"
+        ],
+        "source": "Reuters 2026-03-24 investigation"
+      },
+      {
+        "id": "GZ-M5",
+        "name_en": "Subsea Cable Threat Activity",
+        "name_zh": "海底電纜威脅活動",
+        "description": "Suspicious vessel activity near submarine cables",
+        "indicators": [
+          "Anchoring or drifting near known cable routes",
+          "Dragging anchor over cable path",
+          "Survey vessels mapping cable locations",
+          "Fishing vessel trawling near cable corridors"
+        ]
+      },
+      {
+        "id": "GZ-A1",
+        "name_en": "ADIZ Incursion",
+        "name_zh": "防空識別區入侵",
+        "description": "PLA aircraft entering Taiwan's Air Defense Identification Zone",
+        "indicators": [
+          "Crossing into Taiwan ADIZ without authorization",
+          "Crossing Taiwan Strait median line",
+          "Multiple aircraft coordinated entry",
+          "Accompanied by naval exercises"
+        ]
+      },
+      {
+        "id": "GZ-A2",
+        "name_en": "Military Exercise Escalation",
+        "name_zh": "軍事演習升級",
+        "description": "Large-scale military exercises used as gray zone coercion",
+        "indicators": [
+          "Joint Sword-type exercises encircling Taiwan",
+          "Live-fire drills in Taiwan Strait",
+          "Ballistic missile overflight",
+          "Multi-domain exercises (air+sea+cyber+space)"
+        ],
+        "historical_events": [
+          "2022-08: Speaker Pelosi visit response drills",
+          "2023-04: Joint Sword A (蔡英文過境美國)",
+          "2024-05: Joint Sword B (賴清德就職)",
+          "2024-10: Joint Sword C"
+        ]
+      }
+    ]
+  },
+  "csis_framework_parameters": {
+    "dataset_scope": "~12,000 unique MMSIs near Taiwan (2024 baseline)",
+    "china_flagged_fishing": 315,
+    "flagged_gray_zone_actors": 128,
+    "ais_anomaly_types": [
+      "Going dark (AIS disabled)",
+      "Identity switching (MMSI change)",
+      "AIS spoofing (false position)",
+      "Delayed reporting"
+    ],
+    "drill_zones": [
+      "August 2022 exercise areas",
+      "Joint Sword A zones",
+      "Joint Sword B zones",
+      "Joint Sword C zones"
+    ]
+  }
+}

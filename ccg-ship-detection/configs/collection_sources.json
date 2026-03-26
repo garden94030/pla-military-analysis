@@ -2,8 +2,8 @@
   "sources": [
     {
       "name": "sentinel2",
-      "provider": "ESA Copernicus",
-      "api_endpoint": "https://scihub.copernicus.eu/dhus/odata/v1",
+      "provider": "ESA Copernicus (CDSE)",
+      "api_endpoint": "https://catalogue.dataspace.copernicus.eu/odata/v1",
       "type": "optical",
       "resolution_m": 10,
       "bands": ["B02", "B03", "B04", "B08"],
@@ -13,8 +13,8 @@
     },
     {
       "name": "sentinel1",
-      "provider": "ESA Copernicus",
-      "api_endpoint": "https://scihub.copernicus.eu/dhus/odata/v1",
+      "provider": "ESA Copernicus (CDSE)",
+      "api_endpoint": "https://catalogue.dataspace.copernicus.eu/odata/v1",
       "type": "SAR",
       "resolution_m": 5,
       "mode": "IW",
