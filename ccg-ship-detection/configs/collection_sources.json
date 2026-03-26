@@ -1,0 +1,247 @@
+{
+  "sources": [
+    {
+      "name": "sentinel2",
+      "provider": "ESA Copernicus",
+      "api_endpoint": "https://scihub.copernicus.eu/dhus/odata/v1",
+      "type": "optical",
+      "resolution_m": 10,
+      "bands": ["B02", "B03", "B04", "B08"],
+      "cost": "free",
+      "revisit_days": 5,
+      "notes": "Suitable for detecting large vessels; limited for small boats"
+    },
+    {
+      "name": "sentinel1",
+      "provider": "ESA Copernicus",
+      "api_endpoint": "https://scihub.copernicus.eu/dhus/odata/v1",
+      "type": "SAR",
+      "resolution_m": 5,
+      "mode": "IW",
+      "polarization": ["VV", "VH"],
+      "cost": "free",
+      "revisit_days": 6,
+      "notes": "All-weather capability; good for ship wake detection"
+    },
+    {
+      "name": "planet",
+      "provider": "Planet Labs",
+      "api_endpoint": "https://api.planet.com/data/v1",
+      "type": "optical",
+      "resolution_m": 3,
+      "cost": "commercial",
+      "revisit_days": 1,
+      "notes": "Daily revisit; good resolution for medium vessels"
+    },
+    {
+      "name": "maxar",
+      "provider": "Maxar Technologies",
+      "api_endpoint": "https://api.maxar.com",
+      "type": "optical",
+      "resolution_m": 0.3,
+      "cost": "commercial",
+      "notes": "Highest resolution; can identify vessel details and hull numbers"
+    },
+    {
+      "name": "skyfi",
+      "provider": "SkyFi",
+      "api_endpoint": "https://api.skyfi.com",
+      "type": "multi-source",
+      "resolution_m": "variable",
+      "cost": "commercial",
+      "notes": "Aggregator for multiple satellite providers; on-demand tasking"
+    }
+  ],
+  "regions_of_interest": [
+    {
+      "name": "Taiwan Strait",
+      "name_zh": "台灣海峽",
+      "bbox": [117.0, 22.0, 121.0, 26.0],
+      "priority": "high"
+    },
+    {
+      "name": "East China Sea",
+      "name_zh": "東海",
+      "bbox": [120.0, 25.0, 130.0, 35.0],
+      "priority": "high"
+    },
+    {
+      "name": "South China Sea - Spratly Islands",
+      "name_zh": "南海-南沙群島",
+      "bbox": [109.0, 5.0, 118.0, 13.0],
+      "priority": "high"
+    },
+    {
+      "name": "Senkaku/Diaoyu Islands",
+      "name_zh": "尖閣諸島/釣魚台",
+      "bbox": [123.0, 25.5, 124.5, 26.5],
+      "priority": "critical"
+    },
+    {
+      "name": "Scarborough Shoal",
+      "name_zh": "黃岩島",
+      "bbox": [117.5, 15.0, 118.5, 16.0],
+      "priority": "high"
+    },
+    {
+      "name": "Second Thomas Shoal",
+      "name_zh": "仁愛暗沙",
+      "bbox": [115.5, 9.5, 116.5, 10.5],
+      "priority": "high"
+    },
+    {
+      "name": "Guam Approaches",
+      "name_zh": "關島周邊",
+      "bbox": [143.0, 12.0, 146.0, 15.0],
+      "priority": "critical",
+      "notes": "Reuters 2026: Chinese research vessels mapped waters surrounding Guam where US nuclear submarines are stationed"
+    },
+    {
+      "name": "Philippine Sea - East of Philippines",
+      "name_zh": "菲律賓海-菲律賓以東",
+      "bbox": [124.0, 8.0, 135.0, 20.0],
+      "priority": "critical",
+      "notes": "Reuters 2026: Most comprehensive Chinese ocean surveying conducted here, along First Island Chain"
+    },
+    {
+      "name": "Luzon Strait",
+      "name_zh": "呂宋海峽",
+      "bbox": [119.0, 18.5, 123.0, 22.0],
+      "priority": "critical",
+      "notes": "Reuters 2026: China deployed advanced sensors in strait through which US submarines transit to South China Sea"
+    },
+    {
+      "name": "Malacca Strait Approaches",
+      "name_zh": "馬六甲海峽入口",
+      "bbox": [93.0, 0.0, 105.0, 8.0],
+      "priority": "high",
+      "notes": "Reuters 2026: Dong Fang Hong 3 criss-crossed waters between Sri Lanka and Indonesia covering Malacca approaches"
+    },
+    {
+      "name": "Ninety East Ridge - Indian Ocean",
+      "name_zh": "東經九十度海嶺-印度洋",
+      "bbox": [88.0, -5.0, 92.0, 15.0],
+      "priority": "high",
+      "notes": "Reuters 2026: Chinese sensor array along underwater mountain range, astride approach to Malacca Strait"
+    },
+    {
+      "name": "Hawaii Approaches",
+      "name_zh": "夏威夷周邊",
+      "bbox": [-162.0, 18.0, -154.0, 23.0],
+      "priority": "high",
+      "notes": "Reuters 2026: Chinese vessels mapped waters around Hawaii, a US regional military hub"
+    },
+    {
+      "name": "Wake Atoll Approaches",
+      "name_zh": "威克島周邊",
+      "bbox": [165.0, 18.0, 168.0, 21.0],
+      "priority": "high",
+      "notes": "Reuters 2026: Surveying near US military facilities on Wake atoll"
+    },
+    {
+      "name": "Christmas Island - Indian Ocean",
+      "name_zh": "聖誕島-印度洋",
+      "bbox": [104.0, -12.0, 106.5, -9.5],
+      "priority": "medium",
+      "notes": "Reuters 2026: Chinese vessels scouted around Christmas Island, on route between SCS and Australian submarine base"
+    },
+    {
+      "name": "Arctic - West and North of Alaska",
+      "name_zh": "北極-阿拉斯加西北",
+      "bbox": [-180.0, 60.0, -155.0, 75.0],
+      "priority": "medium",
+      "notes": "Reuters 2026: Chinese vessels mapped seabed west and north of Alaska, essential sea route into Arctic"
+    }
+  ],
+  "ais_sources": [
+    {
+      "name": "MarineTraffic",
+      "url": "https://www.marinetraffic.com",
+      "notes": "CCG vessels often disable AIS; use as supplementary"
+    },
+    {
+      "name": "VesselFinder",
+      "url": "https://www.vesselfinder.com",
+      "notes": "Cross-reference with satellite imagery timestamps"
+    },
+    {
+      "name": "Starboard Maritime Intelligence",
+      "provider": "New Zealand",
+      "notes": "Ship-tracking platform used by Reuters to track 42 Chinese research vessels across 5+ years. Key source for research vessel movement data."
+    }
+  ],
+  "tracked_research_vessels": [
+    {
+      "name_en": "Dong Fang Hong 3",
+      "name_zh": "東方紅3號",
+      "operator": "Ocean University of China (中國海洋大學)",
+      "home_port": "Qingdao, Shandong (青島)",
+      "known_activities": [
+        "2024-2025: Sailed near Taiwan and Guam",
+        "Oct 2024: Checked Chinese ocean sensors near Japan capable of identifying undersea objects",
+        "May 2025: Revisited Japan sensor area",
+        "Mar 2025: Criss-crossed waters between Sri Lanka and Indonesia (Malacca Strait approaches)",
+        "Confirmed deep-sea mapping per co-authored scientific papers"
+      ],
+      "priority": "critical"
+    },
+    {
+      "name_en": "Tan Suo Er Hao",
+      "name_zh": "探索二號",
+      "operator": "Chinese Academy of Sciences",
+      "known_activities": ["Deep-sea research operations"],
+      "priority": "high"
+    },
+    {
+      "name_en": "Zhong Shan Da Xue Hao",
+      "name_zh": "中山大學號",
+      "operator": "Sun Yat-sen University (中山大學)",
+      "known_activities": ["Ocean research and survey"],
+      "priority": "high"
+    },
+    {
+      "name_en": "Xiang Yang Hong series",
+      "name_zh": "向陽紅系列",
+      "operator": "Ministry of Natural Resources (自然資源部)",
+      "known_activities": ["Seabed mapping and oceanographic survey"],
+      "priority": "high"
+    },
+    {
+      "name_en": "Ke Xue Hao",
+      "name_zh": "科學號",
+      "operator": "Chinese Academy of Sciences - Institute of Oceanology (中國科學院海洋研究所)",
+      "known_activities": ["Deep-sea research, sensor deployment"],
+      "priority": "high"
+    }
+  ],
+  "intelligence_context": {
+    "transparent_ocean_program": {
+      "name_zh": "透明海洋",
+      "founded": "circa 2014",
+      "founder": "Wu Lixin (吳立新), Ocean University of China",
+      "funding": "$85M+ from Shandong provincial government",
+      "oversight": "Qingdao National Laboratory for Marine Science and Technology (青島海洋科學與技術國家實驗室)",
+      "military_partners": ["China Naval Submarine Academy (中國海軍潛艦學院)"],
+      "coverage": ["South China Sea (deep-sea basin observation system)", "Pacific Ocean", "Indian Ocean"],
+      "capabilities": "Real-time data on water temperature, salinity, currents, subsea movements"
+    },
+    "us_intelligence_assessment": {
+      "source": "Rear Admiral Mike Brookes, Director, US Office of Naval Intelligence",
+      "date": "March 2026",
+      "testimony": "China has dramatically expanded surveying efforts providing data that enables submarine navigation, concealment, and positioning of seabed sensors or weapons. Potential military intelligence collection by Chinese research vessels represents a strategic concern."
+    },
+    "reuters_investigation": {
+      "date": "2026-03-24",
+      "vessels_tracked": 42,
+      "tracking_period": "5+ years",
+      "tracking_platform": "Starboard Maritime Intelligence (New Zealand)",
+      "key_findings": [
+        "At least 8 vessels confirmed conducting seabed mapping",
+        "Another 10 carried mapping equipment",
+        "Focused on First Island Chain, Guam, Hawaii, Indian Ocean, Arctic",
+        "China building detailed knowledge of marine conditions for submarine warfare",
+        "Civil-military fusion: civilian research directly supports PLA Navy"
+      ]
+    }
+  }
+}

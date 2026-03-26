@@ -1,0 +1,20 @@
+# CCG Ship Detection - YOLOv8 Dataset Configuration
+# 中共海警船偵測 - YOLOv8 資料集設定
+
+path: ../datasets
+train: images/train
+val: images/val
+test: images/test
+
+# Number of classes
+nc: 7
+
+# Class names
+names:
+  0: ccg_large_cutter      # 海警大型巡邏艦 (10,000+ ton)
+  1: ccg_medium_cutter     # 海警中型巡邏艦 (3,000-5,000 ton)
+  2: ccg_patrol_boat       # 海警巡邏艇 (1,000-1,500 ton)
+  3: ccg_fast_attack_craft # 海警快艇
+  4: ccg_auxiliary          # 海警輔助船
+  5: prc_research_vessel   # 中國科考船 (dual-use seabed mapping / 透明海洋)
+  6: prc_ocean_sensor      # 中國海洋感測器/浮標 (subsea arrays)
