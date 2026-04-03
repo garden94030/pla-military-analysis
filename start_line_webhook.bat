@@ -12,24 +12,30 @@ set CLOUDFLARED=C:\Users\garde\AppData\Local\Microsoft\WinGet\Packages\Cloudflar
 
 cd /d "%WORKSPACE%"
 
-:: ── 啟動 Flask Server（背景）──────────────────────────
+:: ── 啟動 Flask Server（背景，使用 /B 避免 Git Bash 路徑問題）
 echo [1/2] 啟動 Flask Webhook Server (port 5000)...
-start "LINE-Flask" /MIN "%PYTHON%" line_webhook_server.py
+start /B "" "%PYTHON%" line_webhook_server.py > line_webhook.log 2>&1
 
 :: 等待 Flask 啟動
-timeout /t 3 /nobreak >nul
+ping -n 4 127.0.0.1 >nul
+
+echo [1/2] Flask 已啟動（port 5000）
+echo.
 
 :: ── 啟動 Cloudflare Tunnel ────────────────────────────
 echo [2/2] 啟動 Cloudflare Tunnel...
 echo.
-echo ★ 請複製下方 trycloudflare.com 的 https:// 網址
-echo ★ 加上 /webhook 後填入 LINE Developers Console
-echo ★ 範例: https://xxxx-xxxx.trycloudflare.com/webhook
+echo ================================================
+echo  ★ 請複製下方 https://xxxx.trycloudflare.com
+echo  ★ 加上 /webhook 填入 LINE Developers Console
+echo  ★ 範例: https://xxxx.trycloudflare.com/webhook
+echo ================================================
 echo.
 "%CLOUDFLARED%" tunnel --url http://localhost:5000
 
-:: 若 cloudflared 關閉，也關閉 Flask
-taskkill /F /FI "WINDOWTITLE eq LINE-Flask*" >nul 2>&1
+:: 結束時關閉 Flask
 echo.
-echo [已停止] LINE Webhook 伺服器已關閉
+echo [已停止] 正在關閉 Flask 伺服器...
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :5000 ^| findstr LISTENING') do taskkill /F /PID %%p >nul 2>&1
+echo [完成] LINE Webhook 伺服器已關閉
 pause
