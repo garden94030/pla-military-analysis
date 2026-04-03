@@ -1,0 +1,165 @@
+{
+  "_comment": "虛擬自動化分析師團隊 — 20名角色定義。github欄位為PR reviewer輪派用途。",
+  "analysts": [
+    {
+      "id": "garde",
+      "name": "首席分析師",
+      "role": "chief-analyst",
+      "focus": ["全域協調", "情報評估", "戰略判斷"],
+      "github": "garde",
+      "auto_assign_topics": ["戰略", "評估", "政策"]
+    },
+    {
+      "id": "analyst-navy-01",
+      "name": "海軍分析師-01",
+      "role": "naval-analyst",
+      "focus": ["水面艦艇", "055驅逐艦", "航艦打擊群", "海上演習"],
+      "github": "analyst-navy-01",
+      "auto_assign_topics": ["055", "航母", "驅逐艦", "護衛艦", "艦隊", "海軍"]
+    },
+    {
+      "id": "analyst-navy-02",
+      "name": "海軍分析師-02",
+      "role": "naval-analyst",
+      "focus": ["潛艦", "反潛作戰", "水下域", "核潛艦"],
+      "github": "analyst-navy-02",
+      "auto_assign_topics": ["潛艦", "潛水艇", "核潛", "反潛", "水下"]
+    },
+    {
+      "id": "analyst-af-01",
+      "name": "空軍分析師-01",
+      "role": "air-analyst",
+      "focus": ["殲-20", "戰術航空", "空優作戰", "ADIZ"],
+      "github": "analyst-af-01",
+      "auto_assign_topics": ["殲-20", "殲20", "戰機", "空軍", "ADIZ", "防空識別區"]
+    },
+    {
+      "id": "analyst-af-02",
+      "name": "空軍分析師-02",
+      "role": "air-analyst",
+      "focus": ["轟炸機", "反艦作戰", "海上打擊", "轟-6"],
+      "github": "analyst-af-02",
+      "auto_assign_topics": ["轟炸機", "轟-6", "轟6", "反艦飛彈", "海上打擊"]
+    },
+    {
+      "id": "analyst-rocket-01",
+      "name": "火箭軍分析師-01",
+      "role": "rocket-analyst",
+      "focus": ["彈道飛彈", "DF系列", "核威懾", "第二砲兵"],
+      "github": "analyst-rocket-01",
+      "auto_assign_topics": ["東風", "DF-", "彈道飛彈", "核武", "火箭軍"]
+    },
+    {
+      "id": "analyst-rocket-02",
+      "name": "火箭軍分析師-02",
+      "role": "rocket-analyst",
+      "focus": ["巡弋飛彈", "精準打擊", "A2AD", "反介入區域拒止"],
+      "github": "analyst-rocket-02",
+      "auto_assign_topics": ["巡弋飛彈", "長劍", "A2AD", "反介入", "精準打擊"]
+    },
+    {
+      "id": "analyst-cyber-01",
+      "name": "網路分析師-01",
+      "role": "cyber-analyst",
+      "focus": ["網路戰", "APT組織", "資訊戰", "駭客"],
+      "github": "analyst-cyber-01",
+      "auto_assign_topics": ["網路攻擊", "APT", "駭客", "資訊戰", "網路戰", "電磁"]
+    },
+    {
+      "id": "analyst-space-01",
+      "name": "太空分析師-01",
+      "role": "space-analyst",
+      "focus": ["衛星", "反衛星武器", "太空域", "北斗"],
+      "github": "analyst-space-01",
+      "auto_assign_topics": ["衛星", "太空", "北斗", "反衛星", "ASAT"]
+    },
+    {
+      "id": "analyst-tw-01",
+      "name": "台海分析師-01",
+      "role": "taiwan-analyst",
+      "focus": ["台海情勢", "ADIZ侵擾統計", "封鎖演習"],
+      "github": "analyst-tw-01",
+      "auto_assign_topics": ["台海", "台灣海峽", "封鎖", "台灣", "兩岸"]
+    },
+    {
+      "id": "analyst-tw-02",
+      "name": "台海分析師-02",
+      "role": "taiwan-analyst",
+      "focus": ["台灣防衛能力", "非對稱戰", "台灣軍購"],
+      "github": "analyst-tw-02",
+      "auto_assign_topics": ["台灣防衛", "非對稱", "豪豬戰略", "軍購", "海馬斯"]
+    },
+    {
+      "id": "analyst-ecs-01",
+      "name": "東海分析師-01",
+      "role": "regional-analyst",
+      "focus": ["東海局勢", "釣魚台", "日本防衛"],
+      "github": "analyst-ecs-01",
+      "auto_assign_topics": ["東海", "釣魚台", "尖閣", "日本", "自衛隊"]
+    },
+    {
+      "id": "analyst-scs-01",
+      "name": "南海分析師-01",
+      "role": "regional-analyst",
+      "focus": ["南海爭端", "南沙群島", "菲律賓"],
+      "github": "analyst-scs-01",
+      "auto_assign_topics": ["南海", "南沙", "菲律賓", "仁愛礁", "黃岩島"]
+    },
+    {
+      "id": "analyst-scs-02",
+      "name": "南海分析師-02",
+      "role": "regional-analyst",
+      "focus": ["灰色地帶", "海警行動", "海上民兵"],
+      "github": "analyst-scs-02",
+      "auto_assign_topics": ["海警", "灰色地帶", "民兵", "水砲", "騷擾"]
+    },
+    {
+      "id": "analyst-intel-01",
+      "name": "OSINT分析師-01",
+      "role": "osint-analyst",
+      "focus": ["OSINT", "商業衛星影像", "港口活動"],
+      "github": "analyst-intel-01",
+      "auto_assign_topics": ["衛星影像", "Maxar", "Planet", "港口", "船隻動態"]
+    },
+    {
+      "id": "analyst-intel-02",
+      "name": "OSINT分析師-02",
+      "role": "osint-analyst",
+      "focus": ["社群媒體情報", "X平台", "輿情監控"],
+      "github": "analyst-intel-02",
+      "auto_assign_topics": ["X平台", "推特", "輿情", "社群媒體", "微博"]
+    },
+    {
+      "id": "analyst-lang-01",
+      "name": "語言分析師-01",
+      "role": "linguist",
+      "focus": ["中文原文解讀", "解放軍文件分析", "官媒研究"],
+      "github": "analyst-lang-01",
+      "auto_assign_topics": ["人民日報", "解放軍報", "新華社", "環球時報", "官媒"]
+    },
+    {
+      "id": "analyst-tech-01",
+      "name": "技術分析師-01",
+      "role": "tech-analyst",
+      "focus": ["武器系統規格", "電子戰", "C4ISR"],
+      "github": "analyst-tech-01",
+      "auto_assign_topics": ["電子戰", "雷達", "C4ISR", "預警機", "通訊"]
+    },
+    {
+      "id": "analyst-assess-01",
+      "name": "評估分析師-01",
+      "role": "assessor",
+      "focus": ["戰略評估", "週報產製", "月度趨勢"],
+      "github": "analyst-assess-01",
+      "auto_assign_topics": ["週報", "月報", "趨勢分析", "戰略評估"]
+    },
+    {
+      "id": "analyst-qa-01",
+      "name": "品質管制-01",
+      "role": "qa-reviewer",
+      "focus": ["PR審查", "情報來源查核", "事實查核"],
+      "github": "analyst-qa-01",
+      "auto_assign_topics": ["查核", "審查", "品質"]
+    }
+  ]
+}
