@@ -98,12 +98,12 @@ def load_wiki_context(x_content: str) -> str:
                 try:
                     content = concept_file.read_text(encoding="utf-8")
                     # 取前 800 字元作為上下文
-                    context_parts.append(f"--- 已知概念：{concept_name} ---\n{content[:800]}")
+                    context_parts.append(f"--- 已知概念：{concept_name} ---\n{content[:400]}")
                 except:
                     pass
-    
+
     if context_parts:
-        return "\n\n".join(context_parts[:8])  # 最多 8 個上下文區塊
+        return "\n\n".join(context_parts[:5])  # 最多 5 個上下文區塊（節省 token）
     return ""
 
 
@@ -186,7 +186,7 @@ def analyze_x_post(x_content: str) -> dict:
     if API_BACKEND == "anthropic":
         message = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=4000,
+            max_tokens=3000,
             system=system_msg,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -196,7 +196,7 @@ def analyze_x_post(x_content: str) -> dict:
     else:
         response = client.chat.completions.create(
             model="grok-3",
-            max_tokens=4000,
+            max_tokens=3000,
             messages=[
                 {"role": "system", "content": system_msg},
                 {"role": "user",   "content": prompt}
