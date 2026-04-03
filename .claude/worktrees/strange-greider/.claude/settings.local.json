@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:/Users/garde/OneDrive/3.教務/1.中共軍事體制研究/每日資料蒐集更新/\"*.py)",
+      "Bash(\"C:\\\\Users\\\\garde\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe\" -m pip install requests --quiet)",
+      "Bash(\"C:\\\\Users\\\\garde\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe\" notifier.py)",
+      "mcp__scheduled-tasks__list_scheduled_tasks",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/garde/OneDrive/3.教務/1.中共軍事體制研究/每日資料蒐集更新/.claude/worktrees/strange-greider/**)",
+      "Bash(done)",
+      "Bash(\"C:\\\\Users\\\\garde\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe\" -c \":*)"
+    ]
+  }
+}
