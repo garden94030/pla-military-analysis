@@ -1,39 +1,102 @@
-# 🤖 AI 協作交接文件 (交接給 Claude Code)
+# 🤖 AI 協作交接文件
 
-> **給接手的 Claude Code：** 
-> 你好！我是負責後端系統升級的 Antigravity。這是我與 User 稍早針對「中共軍事情報知識庫 (20人團隊協作版)」升級的完整進度紀錄。請基於此文件協助 User 繼續測試與擴建。
+> **給接手的 Claude Code：**
+> 以下是本輪對話（2026-04-03 下午）的完整工作進度。請基於此繼續協助 User。
 
 ---
 
 ## 1. 系統當前狀態 (System Status)
-本專案已成功從「單機單人版」升級至 **「支援多人的 Git/GitHub PR 審查系統」**。
-主要包含以下核心功能與目錄：
-*   `_daily_input/`：供 20 人團隊隨時傾倒當日情報資料的收件匣。
-*   `wiki/`：Obsidian 知識庫。所有 AI 生成的知識都會存在這裡 (`concepts/`, `events/`)，且所有檔案都已注入 YAML Frontmatter (例如：`author: ai-agent`, `status: draft`)。
-*   `wiki/raw/`：**【最新建立】** 給 Obsidian Web Clipper 或人類分析師使用的「原始資源圖書館」。這邊存放未經 AI 加工的原始網頁截圖或論文。
 
-## 2. 剛完成的重大變更 (Recent Changes)
-*   **自動 Pull Request (PR) 機制**：
-    `wiki_compiler.py` 已加入自動使用 Git 分支與 `gh` (GitHub CLI) 發送 PR 的功能。
-*   **修復 Windows cp950 編碼地雷**：
-    這是一個重大的 Bug。稍早 `subprocess.run(["git", "commit", "-m", msg], text=True)` 在讀取含有中文的輸出時會觸發 `UnicodeDecodeError`。我已在 `wiki_compiler.py` 的 Git 相關指令中加入了 `encoding="utf-8"` 強制轉碼，成功解決了該崩潰問題。
-*   **GitHub CLI 授權登入**：
-    User 已經在電腦上完成了 `gh auth login`，現在背景的自動化腳本具備了完整的發 Pull Request 權限。
-
-## 3. 目前面臨的問題 / 待解決事項 (Pending Fixes)
-1. **Obsidian Web Clipper 檔名非法字元**：
-   稍早 User 在擷取「(2) 首頁 / X」這篇網頁時，因為標題含有 `/` (Windows 下為非法檔名字元)，導致外掛無法成功將文章存進 `wiki/raw/`。
-   *👉 **給 Claude Code 的下一步指令**：請陪伴 User 測試將無斜線的標題網頁存入 `wiki/raw/`，確保 Web Clipper 運作正常。*
-
-2. **驗證自動 PR 流程**：
-   由於 `wiki/` 內容皆無變動，剛剛的測試沒有觸發 Git commit。 
-   *👉 **給 Claude Code 的下一步指令**：請帶領 User 在隨意一篇 `wiki/concepts/*.md` 裡面加上一行測試字眼，然後執行 `python wiki_compiler.py --team-sync`，並去 GitHub 網頁查看是否成功送出了第一張由 AI 自動生成的 Pull Request 表單！*
-
-## 4. 下一階段發展建議 (Phase 5 Roadmap)
-如果以上測試都順利通過，你們可以開始著手開發以下進階功能：
-*   **編寫 `wiki_health.py`**：定時掃描系統裡還有多少個 PR 處於未審核 (`Draft`) 階段，或是針對太久沒更新的 `concepts/` 卡片發出預警。
-*   **導入 Mermaid 戰略地圖**：在知識卡的生成 Prompt 中，要求它自動加入 `mermaid` 語法來串接實體關係。
-*   **向量資料庫 (RAG) 強化**：隨著資料量暴增，未來的 `wiki_query.py` 可能需要導入 ChromaDB 向量檢索。
+| 子系統 | 狀態 | 備註 |
+|--------|------|------|
+| `analysis.py` | ✅ 正常 | token 優化版（400字/塊，5塊，max_tokens 3000） |
+| `wiki_compiler.py` | ✅ 正常 | `--team-sync` 模式可自動發 PR |
+| `wiki_health.py` | ✅ 升級 | TEAM_REVIEWERS 現從 `team/analysts.json` 動態載入 20 人 |
+| `team/analysts.json` | ✅ 新建 | 20名虛擬分析師角色定義 |
+| `team/team_router.py` | ✅ 新建 | 關鍵字→分析師自動路由 |
+| Stop hook | ✅ 已部署 | `handover_check.py --stop`，10分鐘未更新則阻斷 |
+| PreCompact hook | ✅ 已驗證觸發 | 本輪已觸發一次，系統正常 |
+| GitHub Repo | ✅ 已同步 | `garden94030/pla-military-analysis`，最新 commit：`9b5aac3` |
 
 ---
-交接完畢！Claude Code，接下來這套情報基地就交給你與 User 繼續守護了！🚀
+
+## 2. 本輪已完成的重大變更 (Recent Changes)
+
+1. **虛擬 20 人分析師團隊**（`team/` 目錄）
+   - `team/analysts.json`：20 個角色（海軍×2、空軍×2、火箭軍×2、網路、太空、台海×2、區域×3、OSINT×2、語言、技術、評估、品管）
+   - 每個角色含：id、name、role、focus[]、github帳號、auto_assign_topics[]（關鍵字列表）
+
+2. **`team/team_router.py`**（議題自動路由）
+   - `python team/team_router.py` → 印出完整 20 人名單
+   - `python team/team_router.py "055型驅逐艦演習"` → 自動比對，回傳最適分析師
+   - 可 `from team.team_router import route_topic` 整合進其他腳本
+
+3. **`wiki_health.py` 升級**
+   - `TEAM_REVIEWERS` 從硬編碼 5 人改為從 `team/analysts.json` 動態載入 20 人
+   - `python wiki_health.py --fix` 現在可以輪派給所有 20 位虛擬分析師
+
+4. **`wiki/raw/20260403_Karpathy_AI筆記流_Fox_Hsiao.md`**
+   - 存入 Karpathy AI 知識庫方法論文章（Fox Hsiao 整理版）
+   - 含系統關聯說明（raw/→wiki/→查詢 = 本系統架構完全對應）
+
+5. **已 commit + push 至 GitHub**（commit `9b5aac3`）
+
+---
+
+## 3. 目前面臨的問題 / 待解決事項 (Pending Fixes)
+
+1. **git index.lock 持續卡住**
+   - git add 操作常觸發 lock 衝突（background 程序殘留）
+   - **解法**：用 `powershell -Command "Set-Location '...'; Remove-Item '.git\index.lock' -Force; git add ...; git commit ...; git push"` 一次性執行
+
+2. **`_system/handover_check.py` 舊副本未清理**
+   - 根目錄有 `handover_check.py`（正確版），`_system/` 裡還有舊副本
+   - 可刪除：`del "_system\handover_check.py"`
+
+3. **`wiki/assessments/` 尚無週報**
+   - `/intel-weekly` skill 已建立，第一份週報尚未生成
+   - 下一輪執行：`/intel-weekly`（涵蓋 2026 W14：3/29-4/4）
+
+4. **自動 PR 流程未完整測試**
+   - `wiki_compiler.py --team-sync` 的 PR 功能需在真實變更時測試
+   - 測試方法：在任一 `wiki/concepts/*.md` 加一行，執行 `python wiki_compiler.py --team-sync`
+
+5. **team_router 尚未整合進 analysis.py**
+   - 目前 `team_router.py` 獨立可用，但尚未接入每日分析流程
+   - 後續可在 `analysis.py` 的議題輸出前呼叫 `route_topic(title)` 自動標記負責人
+
+---
+
+## 4. 下一階段發展建議 (Next Steps)
+
+### 優先度 🔴 高
+1. **執行第一份週報**：輸入 `/intel-weekly`，產出 `wiki/assessments/2026W14_週報.md`
+
+### 優先度 🟡 中
+2. **整合 team_router 進 analysis.py**：每個議題輸出時自動附上 `reviewer: @analyst-xxx`
+3. **測試 wiki_compiler.py --team-sync PR 流程**
+
+---
+
+## 5. 本輪關鍵指令參考
+
+```bash
+# 虛擬團隊名單
+python team/team_router.py
+
+# 測試議題路由
+python team/team_router.py "東風-21D 反艦演習"
+
+# 知識庫健康報告
+python wiki_health.py
+
+# 自動輪派 reviewer
+python wiki_health.py --fix
+
+# git lock 解除（固定寫法）
+powershell -Command "Set-Location '...完整路徑...'; Remove-Item '.git\index.lock' -Force -ErrorAction SilentlyContinue; git add .; git commit -m '...'; git push"
+```
+
+---
+
+*本文件由 Claude Sonnet 4.6 於 2026-04-03 自動生成並交接 | 下一輪請從 `## 3. 待解決事項` 開始檢視*
