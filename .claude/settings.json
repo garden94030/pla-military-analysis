@@ -1,0 +1,55 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python auto_analyze_raw.py 2>nul || echo '✅ wiki/raw/ autoanalyze checked'",
+            "timeout": 10,
+            "statusMessage": "🔍 檢查 wiki/raw/ 新檔案...",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python handover_check.py --stop 2>nul || echo '{\"continue\": false, \"stopReason\": \"⚠️ 交接文件檢查失敗，請手動確認 HANDOVER.md 是否已更新。\"}'",
+            "timeout": 5,
+            "statusMessage": "🔍 檢查 HANDOVER.md 交接文件更新狀態..."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python handover_check.py --precompact 2>nul || echo '{\"systemMessage\":\"⚠️ 請立即撰寫 HANDOVER.md - 對話即將壓縮\"}'",
+            "timeout": 15,
+            "statusMessage": "🔴 準備交接文件，提醒撰寫文件..."
+          }
+        ]
+      },
+      {
+        "matcher": "manual",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python handover_check.py --precompact 2>nul || echo '{\"systemMessage\":\"⚠️ 請立即撰寫 HANDOVER.md - 對話即將壓縮\"}'",
+            "timeout": 15,
+            "statusMessage": "🔴 準備交接文件，提醒撰寫文件..."
+          }
+        ]
+      }
+    ]
+  }
+}
