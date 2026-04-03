@@ -11,10 +11,10 @@
             "id": "de480767671d7098",
             "type": "leaf",
             "state": {
-              "type": "graph",
+              "type": "empty",
               "state": {},
-              "icon": "lucide-git-fork",
-              "title": "關聯圖檢視"
+              "icon": "lucide-file",
+              "title": "新分頁"
             }
           }
         ]
@@ -177,5 +177,17 @@
     }
   },
   "active": "de480767671d7098",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "raw/HE7q-r2aUAAdBp4.jfif",
+    "raw/HE7q-r2aUAAdBp4.jfif.crdownload",
+    "raw/20260403_Karpathy_AI筆記流_Fox_Hsiao.md",
+    "events/20260403_綜合分析報告：中國核武現代化擴建與台灣國防影響.md",
+    "raw/CLAUDE.md",
+    "_entities.md",
+    "raw/Thread by @h5LPyKL7TP6jjop.md",
+    "raw/Thread by @h5LPyKL7TP6jjop.md.crdownload",
+    "assessments/2026W14_週報.md",
+    "_index.md",
+    "raw"
+  ]
 }
