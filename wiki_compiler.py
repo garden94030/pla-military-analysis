@@ -19,6 +19,7 @@ import re
 import subprocess
 from datetime import datetime
 from pathlib import Path
+from team.team_router import route_topic
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -139,12 +140,16 @@ def compile_event(issue: dict) -> Path:
     if event_file.exists():
         return event_file  # 已存在，跳過
     
+    analyst = route_topic(title)
+    
     # 建立事件卡片（直接用原始分析內容，加上 frontmatter）
     card = f"""---
 date: {date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}
 title: {title}
 type: event
 tags: [事件, {date_str}]
+author: Antigravity-Compiler
+reviewer: @{analyst['github']} ({analyst['name']})
 ---
 
 # {title}
@@ -217,13 +222,15 @@ def compile_concept(concept_name: str, related_issues: list) -> Path:
     
     events_section = "\n".join(event_refs) if event_refs else "- 尚無記錄"
     
+    analyst = route_topic(concept_name)
+    
     # 團隊版 Frontmatter
     card = f"""---
 title: {concept_name}
 type: concept
 status: draft
 author: Antigravity-Compiler
-reviewer: 待指派
+reviewer: @{analyst['github']} ({analyst['name']})
 created: {datetime.now().strftime('%Y-%m-%d')}
 updated: {datetime.now().strftime('%Y-%m-%d')}
 tags: [概念]
@@ -265,35 +272,39 @@ def push_pr_for_topic(concept_name: str, files_to_commit: list):
     
     try:
         # 切換回主分支並確保乾淨
-        subprocess.run(["git", "checkout", "main"], cwd=WORKSPACE, capture_output=True)
+        subprocess.run(["git", "checkout", "main"], cwd=WORKSPACE, capture_output=True, encoding='utf-8', errors='ignore')
         # 建立新分支
-        subprocess.run(["git", "checkout", "-b", branch_name], cwd=WORKSPACE, check=True, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", branch_name], cwd=WORKSPACE, check=True, capture_output=True, encoding='utf-8', errors='ignore')
         
         # 加入檔案
         for f in files_to_commit:
-            subprocess.run(["git", "add", str(f)], cwd=WORKSPACE, check=True, capture_output=True)
+            subprocess.run(["git", "add", str(f)], cwd=WORKSPACE, check=True, capture_output=True, encoding='utf-8', errors='ignore')
         
         # 準備 Commit 和 Push
         commit_msg = f"update(wiki): AI 更新情報報告 [{concept_name}]"
-        res = subprocess.run(["git", "commit", "-m", commit_msg], cwd=WORKSPACE, capture_output=True, text=True)
+        res = subprocess.run(["git", "commit", "-m", commit_msg], cwd=WORKSPACE, capture_output=True, text=True, encoding='utf-8', errors='ignore')
         
         # 若沒有變更就不需要發 PR
         if "nothing to commit" in res.stdout:
-            subprocess.run(["git", "checkout", "main"], cwd=WORKSPACE, capture_output=True)
+            subprocess.run(["git", "checkout", "main"], cwd=WORKSPACE, capture_output=True, encoding='utf-8', errors='ignore')
             return
 
-        subprocess.run(["git", "push", "-u", "origin", branch_name], cwd=WORKSPACE, check=True, capture_output=True)
+        subprocess.run(["git", "push", "-u", "origin", branch_name], cwd=WORKSPACE, check=True, capture_output=True, encoding='utf-8', errors='ignore')
         
-        # 建立 PR
+        # 建立 PR 並自動指派負責人
         pr_title = f"🚨 自動編譯情報更新：[ {concept_name} ]"
-        pr_body = f"Antigravity AI 已根據今日情資建立/更新了 **{concept_name}** 相關情報。\n\n請對應小組分析師進行 Review 並 Merge 本次更新。"
-        subprocess.run(["gh", "pr", "create", "--title", pr_title, "--body", pr_body], cwd=WORKSPACE, check=True, capture_output=True)
+        analyst = route_topic(concept_name)
+        assignee = analyst['github']
+        pr_body = f"Antigravity AI 已根據今日情資建立/更新了 **{concept_name}** 相關情報。\n\n請對應小組分析師 **@{assignee}** ({analyst['name']}) 進行 Review 並 Merge 本次更新。"
         
-        print(f"   🚀 已成功為 {concept_name} 自動發送 Pull Request")
+        # 使用 gh pr create --assignee 指派負責人
+        subprocess.run(["gh", "pr", "create", "--title", pr_title, "--body", pr_body, "--assignee", assignee], cwd=WORKSPACE, check=True, capture_output=True, encoding='utf-8', errors='ignore')
+        
+        print(f"   🚀 已成功為 {concept_name} 自動發送 Pull Request (指派給: @{assignee})")
     except Exception as e:
         print(f"   ⚠️ 建立 PR 發生錯誤 ({concept_name}): {e}")
     finally:
-        subprocess.run(["git", "checkout", "main"], cwd=WORKSPACE, capture_output=True)
+        subprocess.run(["git", "checkout", "main"], cwd=WORKSPACE, capture_output=True, encoding='utf-8', errors='ignore')
 
 
 def build_index(issues: list, concepts: dict):

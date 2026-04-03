@@ -75,19 +75,19 @@ def print_team_roster():
         roles_seen[role].append(a)
 
     role_labels = {
-        "chief-analyst": "🎯 首席",
-        "naval-analyst": "⚓ 海軍",
-        "air-analyst": "✈️  空軍",
-        "rocket-analyst": "🚀 火箭軍",
-        "cyber-analyst": "💻 網路/電子",
-        "space-analyst": "🛰️  太空",
-        "taiwan-analyst": "🗺️  台海",
-        "regional-analyst": "🌏 區域",
-        "osint-analyst": "🔍 OSINT",
-        "linguist": "📖 語言",
-        "tech-analyst": "⚙️  技術",
-        "assessor": "📊 評估",
-        "qa-reviewer": "✅ 品管",
+        "director": "🎯 首席/戰略",
+        "naval-expert": "⚓ 海軍專家",
+        "air-expert": "✈️  空軍專家",
+        "rocket-expert": "🚀 火箭軍專家",
+        "cyber-expert": "💻 網路/電磁",
+        "space-expert": "🛰️  太空專家",
+        "taiwan-expert": "🗺️  台海專家",
+        "regional-expert": "🌏 區域專家",
+        "osint-expert": "🔍 OSINT專家",
+        "linguist": "📖 語言/政工",
+        "tech-expert": "⚙️  軍工技術",
+        "assessor": "📊 戰略評估",
+        "reviewer": "✅ 品質管制",
     }
 
     for role, members in roles_seen.items():
