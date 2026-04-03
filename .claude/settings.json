@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"C:/Users/garde/OneDrive/3.教務/1.中共軍事體制研究/每日資料蒐集更新/handover_check.py\" --stop",
+            "timeout": 15,
+            "statusMessage": "📋 檢查交接文件狀態..."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"C:/Users/garde/OneDrive/3.教務/1.中共軍事體制研究/每日資料蒐集更新/handover_check.py\" --precompact",
+            "timeout": 15,
+            "statusMessage": "📝 準備交接文件（對話即將壓縮）..."
+          }
+        ]
+      },
+      {
+        "matcher": "manual",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"C:/Users/garde/OneDrive/3.教務/1.中共軍事體制研究/每日資料蒐集更新/handover_check.py\" --precompact",
+            "timeout": 15,
+            "statusMessage": "📝 準備交接文件（手動壓縮）..."
+          }
+        ]
+      }
+    ]
+  }
+}

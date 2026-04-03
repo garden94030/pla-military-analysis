@@ -1,0 +1,45 @@
+schema: spec-driven
+locale: en
+
+context: |
+  專案名稱: 中共軍事動態每日情資分析系統
+  語言: Python 3.x, 繁體中文
+  主要功能:
+    - 每日自動蒐集 X 平台、智庫報告、新聞的中共軍事動態
+    - 使用 Claude API 進行深度分析
+    - 產出結構化研究報告 (Markdown 格式)
+    - 自動歸檔管理
+
+  目錄結構:
+    _daily_input/   - 原始資料輸入 (X貼文, 新聞, 智庫報告 .txt)
+    _daily_output/  - 分析報告輸出 (按議題建資料夾, .md)
+    _archive/       - 已處理資料歸檔
+    analysis.py     - 主分析腳本
+
+  技術堆疊:
+    - Python + anthropic SDK (Claude API)
+    - Grok 排程蒐集 X 平台資訊 (每日 0500)
+    - Gmail 接收 Grok 報告
+    - OneDrive 雲端同步
+    - GitHub 版本控制
+
+  分析報告格式規範:
+    - 原始摘要 (中英對照)
+    - 核心分析 (300-500字/節)
+    - 政策建議清單
+    - 引用文獻 (Chicago 格式)
+
+  命名規則:
+    - 資料夾: YYYYMMDD_議題XX_主題名稱
+    - 檔案: 深度分析_主題名稱.md
+    - 綜合報告: YYYYMMDD_中共軍事動態綜合分析報告.md
+
+rules:
+  proposal:
+    - 所有變更必須考慮對分析流程的影響
+    - 新增功能需包含錯誤處理和日誌記錄
+    - API 金鑰必須使用環境變數，不得寫死在程式碼中
+  tasks:
+    - 每個任務應可獨立測試
+    - 涉及 API 的任務需包含重試機制
+    - 檔案處理需使用 UTF-8 編碼
