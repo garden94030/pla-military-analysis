@@ -32,14 +32,15 @@ INPUT_DIR   = WORKSPACE / "_daily_input"
 SYSTEM_DIR  = WORKSPACE / "_system"
 SYSTEM_DIR.mkdir(exist_ok=True)
 
-# ── 20人團隊 reviewer 輪派清單 ───────────────────────────
-TEAM_REVIEWERS = [
-    "garde",        # 主分析師
-    "analyst-02",
-    "analyst-03",
-    "analyst-04",
-    "analyst-05",
-]
+# ── 20人虛擬團隊 reviewer 輪派清單（從 team/analysts.json 載入）────
+def _load_team_reviewers() -> list:
+    analysts_file = WORKSPACE / "team" / "analysts.json"
+    if analysts_file.exists():
+        data = json.loads(analysts_file.read_text(encoding="utf-8"))
+        return [a["github"] for a in data.get("analysts", [])]
+    return ["garde"]  # fallback
+
+TEAM_REVIEWERS = _load_team_reviewers()
 
 STALE_DAYS = 7  # 超過幾天未更新視為 stale
 
