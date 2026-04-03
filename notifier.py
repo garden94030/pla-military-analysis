@@ -60,7 +60,7 @@ class EmailNotifier:
         if recipients is None:
             # 從 .env 讀取，或使用預設值
             config = load_env()
-            email_str = config.get('NOTIFICATION_EMAILS', 'garden94030@gmail.com,chengkunma@gmail.com,y0528.gary@gmail.com,gm@securetaiwan.org')
+            email_str = config.get('NOTIFICATION_EMAILS', 'garden94030@gmail.com,chengkunma@gmail.com,y0528.gary@gmail.com,gm@securetaiwan.org,nec3366@gmail.com')
             self.recipients = [e.strip() for e in email_str.split(',') if e.strip()]
         elif isinstance(recipients, str):
             self.recipients = [e.strip() for e in recipients.split(',') if e.strip()]
@@ -167,9 +167,9 @@ class EmailNotifier:
             date_str = datetime.now().strftime('%Y-%m-%d')
             subject = f"📊 中共軍事動態分析報告 — {date_str}"
 
-        # 建立郵件
+        # 建立郵件（密件副本，收件人互不可見）
         msg = MIMEMultipart('alternative')
-        msg['To'] = ', '.join(self.recipients)
+        msg['Bcc'] = ', '.join(self.recipients)
         msg['Subject'] = subject
 
         # 純文字版
@@ -218,7 +218,7 @@ class EmailNotifier:
             subject = f"📊 中共軍事動態每日摘要 — {date_str}"
 
         msg = MIMEText(summary_text, 'plain', 'utf-8')
-        msg['To'] = ', '.join(self.recipients)
+        msg['Bcc'] = ', '.join(self.recipients)
         msg['Subject'] = subject
 
         try:
