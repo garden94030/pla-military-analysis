@@ -1,0 +1,44 @@
+2026-04-03 10:52:27,587 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.6.222:5000
+2026-04-03 10:52:27,588 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-03 10:53:04,770 [INFO] 127.0.0.1 - - [03/Apr/2026 10:53:04] "GET /health HTTP/1.1" 200 -
+2026-04-03 10:54:34,925 [INFO] 127.0.0.1 - - [03/Apr/2026 10:54:34] "POST /webhook HTTP/1.1" 200 -
+2026-04-03 10:54:56,648 [INFO] 收到訊息: https://www.reuters.com/world/china/
+2026-04-03 10:54:56,649 [INFO] 正在抓取: https://www.reuters.com/world/china/
+2026-04-03 10:54:56,947 [WARNING] HTTP Error 401 Client Error: HTTP Forbidden for url: https://www.reuters.com/world/china/: https://www.reuters.com/world/china/
+2026-04-03 10:54:56,949 [INFO] ✅ 已存入: 2026 0403 LINE_www.reuters.com - china.txt
+2026-04-03 10:54:57,100 [WARNING] LINE reply 失敗 400: {"message":"Invalid reply token"}
+2026-04-03 10:54:57,101 [INFO] 127.0.0.1 - - [03/Apr/2026 10:54:57] "POST /webhook HTTP/1.1" 200 -
+2026-04-03 12:41:20,627 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.6.222:5000
+2026-04-03 12:41:20,628 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-03 12:43:58,486 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.6.222:5000
+2026-04-03 12:43:58,488 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-03 12:45:10,809 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.6.222:5000
+2026-04-03 12:45:10,809 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-03 12:46:29,869 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.6.222:5000
+2026-04-03 12:46:29,870 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-03 12:46:48,089 [INFO] 127.0.0.1 - - [03/Apr/2026 12:46:48] "POST /webhook HTTP/1.1" 200 -
+2026-04-03 12:49:21,358 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.6.222:5000
+2026-04-03 12:49:21,358 [INFO] [33mPress CTRL+C to quit[0m
+2026-04-03 12:50:28,504 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.6.222:5000
+2026-04-03 12:50:28,505 [INFO] [33mPress CTRL+C to quit[0m
