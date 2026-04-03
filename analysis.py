@@ -87,7 +87,21 @@ def analyze_x_post(x_content: str) -> dict:
 
 # ============= 主程序 =============
 def main():
-    # 掃描輸入資料夾
+    # Step 0: 嘗試自動讀取 Gmail（Grok 郵件）
+    try:
+        from gmail_reader import GrokEmailReader
+        reader = GrokEmailReader()
+        gmail_files = reader.run()
+        if gmail_files:
+            print(f"📬 Gmail 自動讀取: {len(gmail_files)} 封新郵件")
+    except FileNotFoundError:
+        print("⚠️ Gmail 認證未設定，使用手動輸入模式")
+    except ImportError:
+        print("⚠️ gmail_reader 模組未安裝，使用手動輸入模式")
+    except Exception as e:
+        print(f"⚠️ Gmail 讀取失敗，使用手動輸入模式: {e}")
+
+    # 掃描輸入資料夾（含手動 + Gmail 自動讀取的檔案）
     input_files = list(INPUT_DIR.glob("*.txt"))
 
     if not input_files:
@@ -95,6 +109,7 @@ def main():
         return
 
     print(f"✅ 找到 {len(input_files)} 個輸入檔案")
+    generated_reports = []
 
     for input_file in input_files:
         print(f"\n📄 處理: {input_file.name}")
@@ -122,6 +137,7 @@ def main():
                 f.write(analysis)
 
             print(f"✅ 已生成: {output_file.name}")
+            generated_reports.append(output_file)
 
             # 移動到歸檔
             archive_file = ARCHIVE_DIR / f"{timestamp}_{input_file.name}"
@@ -130,6 +146,26 @@ def main():
 
         except Exception as e:
             print(f"❌ 分析失敗: {str(e)}")
+
+    # Step 3: 發送通知（Email + LINE）
+    if generated_reports:
+        try:
+            from notifier import Notifier
+            notifier = Notifier()
+            print(f"\n📤 發送通知...")
+
+            for report in generated_reports:
+                result = notifier.notify_report(report)
+                if result['email']:
+                    print(f"  📧 Email 已發送: {report.name}")
+                if result['line']:
+                    print(f"  📱 LINE 已推送: {report.name}")
+
+            print(f"✅ 通知發送完成")
+        except ImportError:
+            print("⚠️ notifier 模組未安裝，跳過通知")
+        except Exception as e:
+            print(f"⚠️ 通知發送失敗: {e}")
 
 
 if __name__ == "__main__":
