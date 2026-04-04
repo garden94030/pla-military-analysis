@@ -1,7 +1,7 @@
 # HANDOVER.md — 交接文件
 
-**最後更新**：2026-04-05 05:35（台北時間 UTC+8）
-**本輪執行類型**：每日自動化分析（Scheduled Task）
+**最後更新**：2026-04-05 06:00（台北時間 UTC+8）
+**本輪執行類型**：人工互動 + Bug 修復
 **執行模型**：Claude Sonnet 4.6
 
 ---
@@ -10,108 +10,79 @@
 
 | 子系統 | 狀態 | 說明 |
 |--------|------|------|
-| Gmail 讀取 | ✅ 正常 | 成功讀取1封Grok彙整（25機11艦），token已刷新 |
-| _daily_input | ✅ 已清空 | 17個.txt + 1個PDF均已處理並歸檔 |
-| _daily_output | ✅ 已產出 | 1份綜合報告 + 10份議題深度分析 |
-| wiki/events | ✅ 已同步 | 10+筆事件卡片已建立（含Agents建立的卡片） |
-| Git/GitHub | ✅ 已提交 | 多筆commits，含報告、事件卡片 |
-| Email通知 | ✅ 已發送 | 寄送至5位收件人（garden94030, chengkunma, y0528.gary, gm@securetaiwan, nec3366） |
-| LINE通知 | ✅ 已發送 | LINE 訊息已送出 |
-| _archive | ✅ 已歸檔 | 17+1筆檔案，含時間戳前綴 |
+| Gmail 讀取 | ✅ 正常 | token 有效，每日自動刷新 |
+| _daily_input | ✅ 已清空 | 今日 18 筆來源已分析並歸檔 |
+| _daily_output | ✅ 已產出 | 20260405 綜合報告 + 10 份議題深度分析 |
+| wiki/events | ✅ 已同步 | 10+ 筆事件卡片已建立 |
+| Git/GitHub | ✅ 最新 | 含今日所有報告與 Bug 修復 |
+| Email 通知 | ✅ 正常 | 送完整 HTML 報告，無問題 |
+| LINE 通知 | ✅ 已修復 | 現在送完整綜合分析報告純文字（約 2 則訊息） |
+| notifier.py | ✅ 已修復 | 兩處 Bug 均已修復（見下方） |
+| Windows 排程 | ✅ 運作中 | 每日 05:07 觸發 run_daily_analysis.bat |
 
 ---
 
 ## 2. 本輪已完成的重大變更
 
-### 已產出報告（_daily_output/）
+### Bug 修復：notifier.py 兩處問題
 
-| 檔案/資料夾 | 說明 |
-|------------|------|
-| `20260405_中共軍事動態綜合分析報告.md` | 主報告，含10議題總覽、跨域威脅分析、政策建議 |
-| `20260405_議題01_解放軍AI蜂群無人機技術投資/` | 深度分析：蜂群技術與台灣IAMD漏洞 |
-| `20260405_議題02_台灣立法院防衛預算僵局/` | 深度分析：三版預算比較、280億缺口影響 |
-| `20260405_議題03_解放軍96A戰車GL6主動防護系統升級/` | 深度分析：GL-6技術、第71集團軍渡海訓練 |
-| `20260405_議題04_海虹工66破壞台馬祖3號海底電纜/` | 深度分析：電纜破壞OSINT重建、灰色地帶模板 |
-| `20260405_議題05_中科院國防技術跨越勁蜂四型/` | 深度分析：勁蜂四型、AI整合、MUM-T |
-| `20260405_議題06_中國幽靈船AIS欺騙菲律賓水域/` | 深度分析：康陵539、30+身分欺騙、EOPL STS |
-| `20260405_議題07_公安部Telegram監控能力/` | 深度分析：300億條消息、7000萬帳戶 |
-| `20260405_議題08_美軍三航母集結中東對印太戰略影響/` | 深度分析：史詩狂怒行動、印太威懾稀釋 |
-| `20260405_議題09_解放軍第71集團軍渡海突擊訓練/` | 深度分析：第71集團軍、渡海作戰預案 |
-| `20260405_議題10_伊朗中國STS石油轉運網絡/` | 深度分析：Sentinel-2衛星偵測、暗艦隊 |
+**Bug 1：重複發送且內容錯誤**
+- 原因：`__main__` 區塊無 `argparse`，`--report`/`--subject` 參數被靜默忽略，改執行硬編碼的舊路徑（`20260331_...`），導致今日分析先寄出舊報告，再寄出正確報告，共兩次
+- 修復：加入 `argparse`，支援 `--report` 和 `--subject` 命令列參數；不指定時自動偵測 `_daily_output/` 最新報告
+- Commit：`b66a34c`
 
-### 未處理但已歸檔的PDF
+**Bug 2：LINE 通知只送精簡摘要**
+- 原因：`send_report_summary()` 只提取標題＋粗體條列（最多50行），不是完整報告
+- 修復：改送完整 `YYYYMMDD_中共軍事動態綜合分析報告.md` 全文，Markdown 語法轉換為純文字（`【】`/`◆`/`▸`），表格分隔行自動略過，超過 5000 字自動分段
+- 目前報告約 9000 字 → 分 2 則 LINE 訊息
+- Commit：`0cae43a`
 
-`_archive/20260405_052920_CMSI-Conference_PLA_Navy.pdf`
-- CMSI Conference: Probing the People of China's Navy and Other Maritime Forces
-- 作者：Dr. Andrew S. Erickson，The Bridge, Naval War College Foundation, Fall-Winter 2025
-- 已提取文字（19,999字）並歸檔，本輪未納入分析（發現時主分析已完成）
-- **建議下一輪優先處理**
+### 議題討論：Dispatch 可行性評估
 
-### 來源資料統計
+用戶詢問專案是否可 Dispatch。結論：
 
-- 來源檔案總數：17個.txt（含1個Grok彙整、16個Obsidian Web Clipper）+ 1個PDF
-- 主要來源：ISW（戰爭研究所）、TWZ（War Zone）、SeaLight Foundation、Manila Times、自由時報軍武頻道、X貼文
-- 最高威脅等級議題（🔴）：解放軍AI蜂群、台灣預算僵局、96A戰車升級、電纜破壞、美軍中東集結
+- **核心限制**：Gmail OAuth token 與所有資料夾均為本機檔案，無法純雲端執行
+- **最可行方案**：LINE Bot 指令觸發（在現有 `line_webhook_server.py` 加入 `!立即分析` 指令觸發 `run_daily_analysis.bat`）
+- **GitHub Actions**：需先在本機安裝 self-hosted runner，較複雜
+- **尚未實作**：等待用戶確認偏好方向
 
 ---
 
 ## 3. 目前面臨的問題 / 待解決事項
 
-### 已知問題
-
-1. **CMSI PDF未納入本日分析**：Dr. Erickson關於解放軍海軍的學術論文已歸檔，需在下一輪補充分析
-2. **notifier.py主函數硬編碼路徑**：`__main__`區塊仍硬編碼為`20260331`舊報告路徑，應更新為動態取最新報告
-3. **_daily_output中有遺留的`nul`檔案**（來自舊版Windows路徑問題），應清理
-
-### 未追蹤的次要情報
-
-以下X貼文內容已收錄但未進行獨立深度分析：
-- @BAIGUANXINGSHU：航天投資公司副總經理詹鐘煒的舉報信（中共反腐動態）
-- @JaidevJamwal：印度烈火-5飛彈（Agni-V）覆蓋中國能力
-- @nuwangzi：聯黎部隊（UNIFIL）第226旅接近中國5-10號前哨營地
-- @AsiaMTI：南海能源勘探地圖更新（新區塊加入）
-- @CSISKoreaChair：黃海中韓臨時措施區浮標問題（13個浮標仍在）
+| 優先級 | 問題 | 說明 |
+|--------|------|------|
+| 🔴 高 | CMSI PDF 未納入分析 | Dr. Erickson CMSI論文（19,999字）已歸檔，待下輪處理 |
+| 🟡 中 | Dispatch 方案未實作 | 用戶詢問可行性，尚未決定方向 |
+| 🟡 中 | `_daily_output/nul` 遺留檔案 | Windows 路徑問題造成的空檔，可清理 |
+| 🟢 低 | 次要議題未建立 wiki 條目 | BAIGUANXINGSHU 反腐、黃海浮標、南海能源等 |
 
 ---
 
 ## 4. 下一階段發展建議
 
-**優先順序1（最高）**：處理CMSI PDF
-- 建立議題：「中共海軍人員結構與海上力量評估（Erickson CMSI報告）」
-- 將Dr. Erickson的學術分析與台海活動情資交叉比對
-- 建立`wiki/concepts/`條目（非事件類型）
+**優先順序1**：確認 Dispatch 需求方向
+- 如要 LINE Bot 指令觸發：修改 `line_webhook_server.py`，加入 `!立即分析` 觸發邏輯
+- 如要 GitHub Actions：在本機安裝 `gh-runner`，建立 `.github/workflows/dispatch.yml`
 
-**優先順序2**：notifier.py修復
-- 更新`__main__`區塊，改為自動偵測`_daily_output/`中最新的報告檔案
-- 避免下次仍發送舊日期的報告
+**優先順序2**：處理 CMSI PDF
+- `_archive/20260405_052920_CMSI-Conference_PLA_Navy.pdf`
+- Dr. Andrew Erickson，The Bridge, Naval War College Foundation, Fall-Winter 2025
+- 建立 `wiki/concepts/` 條目（解放軍海軍人員結構分析）
 
-**優先順序3**：建立次要議題wiki條目
-- 處理@BAIGUANXINGSHU中共反腐動態（可能涉及航天/軍工系統腐敗）
-- 建立黃海浮標問題的追蹤事件卡片（CSIS Korea Chair追蹤中）
-- 更新南海能源勘探地圖（AMTI）
+**優先順序3**：清理技術債
+- 刪除 `_daily_output/nul` 空檔
+- 更新 `wiki/_entities.md` 與 `wiki/.obsidian/workspace.json`（目前有未提交修改）
 
 ---
 
-## 附錄：本輪情資來源完整清單
+## 附錄：Git Log（最近 6 筆）
 
-| 序號 | 來源 | 日期 | 分析議題 |
-|------|------|------|----------|
-| 1 | Grok每日彙整（noreply@x.ai） | 2026-04-04 | 01, 03, 08 |
-| 2 | ISW China & Taiwan Update（Adam Grace） | 2026-04-03 | 01, 02 |
-| 3 | TWZ Carrier Tracker（Ian Ellis-Jones） | 2026-04-03 | 08 |
-| 4 | @SeaLightFound | 2026-04-01 | 04 |
-| 5 | @TheManilaTimes | 2026-04-04 | 06 |
-| 6 | @supbrow（Charlie B） | 2026-04-03 | 06, 10 |
-| 7 | @cnpoliwatch | 2026-04-04 | 07 |
-| 8 | @Byron_Wan | 2026-04-03 | 技術竊密（未獨立議題） |
-| 9 | @new27brigade（渡海+戰車） | 2026-04-04 | 03, 09 |
-| 10 | @new27brigade（C-130J） | 2026-04-04 | 09 |
-| 11 | 自由時報軍武頻道（中科院） | 2026-04-04 | 05 |
-| 12 | @Sankei_news | 2026-04-04 | 南鳥島EEZ（未獨立議題） |
-| 13 | @AsiaMTI | 2026-04-04 | 南海能源（未獨立議題） |
-| 14 | @CSISKoreaChair | 2026-04-03 | 黃海浮標（未獨立議題） |
-| 15 | @nuwangzi | 2026-04-03 | UNIFIL/中國前哨（未獨立） |
-| 16 | @JaidevJamwal | 2026-04-04 | 印度ICBM（周邊） |
-| 17 | @NetAskari | 2026-04-04 | 07（CAC法規輔助） |
-| 18 | @BAIGUANXINGSHU | 2026-04-04 | 反腐（未獨立議題） |
-| PDF | CMSI / Erickson（Fall-Winter 2025） | 已歸檔 | 待下輪處理 |
+```
+0cae43a  feat: LINE 通知改送完整綜合分析報告內容（去除 Markdown 語法）
+b66a34c  fix: notifier.py 支援 --report/--subject 參數並自動偵測最新報告
+f72ccf2  feat: 20260405 每日自動化分析全面完成 — 10議題+綜合報告+HANDOVER
+ec08ae6  feat: 20260405 議題07-10四份深度分析報告全面完成
+a6261f3  feat: 20260405 議題04/05/06 三份深度分析報告完成
+a4327af  feat: 20260405 三份深度分析報告 — AI蜂群/預算僵局/96A戰車APS升級
+```
