@@ -390,9 +390,9 @@ class LineBotNotifier:
 
     def send_report_summary(self, report_path: Path) -> bool:
         """
-        從報告檔案提取摘要並發送到 LINE
+        將完整綜合分析報告內容發送到 LINE（去除 Markdown 語法）
 
-        只發送標題 + 重點事件摘要（控制在 LINE 訊息長度內）
+        超過 5000 字時自動分段發送多則訊息。
         """
         try:
             with open(report_path, 'r', encoding='utf-8') as f:
@@ -401,37 +401,36 @@ class LineBotNotifier:
             logger.error(f"讀取報告失敗: {e}")
             return False
 
-        # 提取摘要（前 2000 字 + 標題資訊）
-        date_str = datetime.now().strftime('%Y-%m-%d %H:%M')
-        summary = (
-            f"🔍 中共軍事動態分析報告\n"
-            f"📅 {date_str}\n"
-            f"{'─' * 25}\n\n"
-        )
-
-        # 提取標題和重點
+        # 將 Markdown 轉為適合 LINE 純文字閱讀的格式
+        import re
         lines = content.split('\n')
-        extracted = []
+        clean_lines = []
         for line in lines:
             stripped = line.strip()
+            # 跳過 YAML frontmatter 分隔線
+            if stripped == '---':
+                continue
+            # 標題轉換
             if stripped.startswith('# '):
-                extracted.append(f"📌 {stripped[2:]}")
+                clean_lines.append(f"【{stripped[2:]}】")
             elif stripped.startswith('## '):
-                extracted.append(f"\n▸ {stripped[3:]}")
+                clean_lines.append(f"\n◆ {stripped[3:]}")
             elif stripped.startswith('### '):
-                extracted.append(f"  • {stripped[4:]}")
-            elif stripped.startswith('- **') or stripped.startswith('* **'):
-                extracted.append(f"  {stripped}")
+                clean_lines.append(f"  ▸ {stripped[4:]}")
+            elif stripped.startswith('#### '):
+                clean_lines.append(f"    • {stripped[5:]}")
+            else:
+                # 去除 Markdown 粗體/斜體、行內程式碼
+                clean = re.sub(r'\*\*(.+?)\*\*', r'\1', stripped)
+                clean = re.sub(r'\*(.+?)\*', r'\1', clean)
+                clean = re.sub(r'`(.+?)`', r'\1', clean)
+                # 去除表格分隔行（|---|---|）
+                if re.match(r'^[\|\s\-:]+$', clean):
+                    continue
+                clean_lines.append(clean)
 
-        summary += '\n'.join(extracted[:50])  # 最多 50 行
-
-        summary += (
-            f"\n\n{'─' * 25}\n"
-            f"📂 完整報告已存入 _daily_output/\n"
-            f"📧 詳細報告已寄送至 Email"
-        )
-
-        return self.send_text(self._truncate(summary))
+        text = '\n'.join(clean_lines).strip()
+        return self.send_text(text)
 
 
 # ============================================================
