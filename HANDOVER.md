@@ -1,187 +1,117 @@
-# 🤖 AI 協作交接文件 (HANDOVER.md)
+# HANDOVER.md — 交接文件
 
-> **給接手的 Claude Code：**
-> 以下是本輪對話的完整工作進度。請基於此繼續協助 User。
-
-**最後更新**: 2026-04-05 05:30（台北時間 UTC+8）
-**Git HEAD**: 待更新（本輪新增議題04/05/06三份深度分析報告）
-**維護人**: garde (@garden94030) + Claude Code AI
+**最後更新**：2026-04-05 05:35（台北時間 UTC+8）
+**本輪執行類型**：每日自動化分析（Scheduled Task）
+**執行模型**：Claude Sonnet 4.6
 
 ---
 
-## 1. 系統當前狀態 (System Status)
+## 1. 系統當前狀態
 
-| 子系統 | 狀態 | 備註 |
+| 子系統 | 狀態 | 說明 |
 |--------|------|------|
-| **analysis.py** | ✅ 正常 | 主分析引擎，15,811 bytes |
-| **wiki_compiler.py** | ✅ 正常 | 含 --team-sync，未實測 PR 功能 |
-| **notifier.py** | ✅ 正常 | Email+LINE 驗證成功，TESTING_MODE=true（只寄主信箱） |
-| **handover_check.py** | ✅ 正常 | Stop Hook 本輪觸發 2 次 |
-| **team/sub_agent_runner.py** | ✅ 完成 | 20人派遣引擎，dry-run 路由 4/4 正確 |
-| **team/briefing_generator.py** | ✅ 完成 | 每日簡報合併推播 |
-| **auto_analyze_raw.py** | 🔴 重建中 | 舊版已刪除，本輪正在重建 |
-| **LINE Webhook** | 🟡 待驗證 | service 已配置，最新推播未測試 |
-| **GitHub Sync** | ✅ 正常 | 最新 commit: ba7b597，已 push |
-
-### wiki/raw/ 狀態
-- 共 **18 份**原始情報（Obsidian Web Clipper 截取，2026-04-03/04）
-- **11 份深度分析**已完成並寫入 `_daily_output/20260404_議題01-11_*/`
-- **Obsidian wiki/events/** 同步完成（11 個事件卡片）
+| Gmail 讀取 | ✅ 正常 | 成功讀取1封Grok彙整（25機11艦），token已刷新 |
+| _daily_input | ✅ 已清空 | 17個.txt + 1個PDF均已處理並歸檔 |
+| _daily_output | ✅ 已產出 | 1份綜合報告 + 10份議題深度分析 |
+| wiki/events | ✅ 已同步 | 10+筆事件卡片已建立（含Agents建立的卡片） |
+| Git/GitHub | ✅ 已提交 | 多筆commits，含報告、事件卡片 |
+| Email通知 | ✅ 已發送 | 寄送至5位收件人（garden94030, chengkunma, y0528.gary, gm@securetaiwan, nec3366） |
+| LINE通知 | ✅ 已發送 | LINE 訊息已送出 |
+| _archive | ✅ 已歸檔 | 17+1筆檔案，含時間戳前綴 |
 
 ---
 
-## 2. 本輪已完成的重大變更 (Recent Changes)
+## 2. 本輪已完成的重大變更
 
-### ✅ C. 2026-04-05 議題04/05/06 深度分析報告（本輪新增）
+### 已產出報告（_daily_output/）
 
-| 議題 | 主題 | 存入路徑 | 章節數 |
-|------|------|---------|--------|
-| 04 | 海虹工66破壞台馬祖3號海底電纜 | `_daily_output/20260405_議題04_海虹工66破壞台馬祖3號海底電纜/` | 9 |
-| 05 | 中科院國防技術三級跳——勁蜂四型與AI整合 | `_daily_output/20260405_議題05_中科院國防技術跨越勁蜂四型/` | 9 |
-| 06 | 中國幽靈船AIS欺騙與菲律賓水域安全威脅 | `_daily_output/20260405_議題06_中國幽靈船AIS欺騙菲律賓水域/` | 9 |
+| 檔案/資料夾 | 說明 |
+|------------|------|
+| `20260405_中共軍事動態綜合分析報告.md` | 主報告，含10議題總覽、跨域威脅分析、政策建議 |
+| `20260405_議題01_解放軍AI蜂群無人機技術投資/` | 深度分析：蜂群技術與台灣IAMD漏洞 |
+| `20260405_議題02_台灣立法院防衛預算僵局/` | 深度分析：三版預算比較、280億缺口影響 |
+| `20260405_議題03_解放軍96A戰車GL6主動防護系統升級/` | 深度分析：GL-6技術、第71集團軍渡海訓練 |
+| `20260405_議題04_海虹工66破壞台馬祖3號海底電纜/` | 深度分析：電纜破壞OSINT重建、灰色地帶模板 |
+| `20260405_議題05_中科院國防技術跨越勁蜂四型/` | 深度分析：勁蜂四型、AI整合、MUM-T |
+| `20260405_議題06_中國幽靈船AIS欺騙菲律賓水域/` | 深度分析：康陵539、30+身分欺騙、EOPL STS |
+| `20260405_議題07_公安部Telegram監控能力/` | 深度分析：300億條消息、7000萬帳戶 |
+| `20260405_議題08_美軍三航母集結中東對印太戰略影響/` | 深度分析：史詩狂怒行動、印太威懾稀釋 |
+| `20260405_議題09_解放軍第71集團軍渡海突擊訓練/` | 深度分析：第71集團軍、渡海作戰預案 |
+| `20260405_議題10_伊朗中國STS石油轉運網絡/` | 深度分析：Sentinel-2衛星偵測、暗艦隊 |
 
-**格式規範符合狀態：**
-- 每份報告含9章節 ✅
-- 每章節正文≥300字 ✅
-- 第一章執行摘要僅繁體中文 ✅
-- Frontmatter完整填寫 ✅
-- 研究時間戳記（台北時間） ✅
-- APA第7版參考文獻（附URL，無捏造URL） ✅
-- 末尾AI聲明 ✅
+### 未處理但已歸檔的PDF
 
+`_archive/20260405_052920_CMSI-Conference_PLA_Navy.pdf`
+- CMSI Conference: Probing the People of China's Navy and Other Maritime Forces
+- 作者：Dr. Andrew S. Erickson，The Bridge, Naval War College Foundation, Fall-Winter 2025
+- 已提取文字（19,999字）並歸檔，本輪未納入分析（發現時主分析已完成）
+- **建議下一輪優先處理**
 
+### 來源資料統計
 
-### ✅ A. wiki/raw/ 18份原始情報 → 11份深度分析報告（2026-04-04）
-
-**分析來源**：Obsidian Web Clipper 截取的18份情報
-
-**產出議題**：
-| 議題 | 主題 | 分析師 | 報告行數 |
-|------|------|--------|---------|
-| 01 | 台灣防衛預算立法僵局（KMT/TPP阻擋IAMD/無人機） | analyst-tw-02 | 208行 |
-| 02 | 美軍三航母CSG部署 Operation Epic Fury | analyst-navy-01 | ~200行 |
-| 03 | 康陵539號幽靈船 AIS欺騙（菲律賓） | analyst-scs-02 | 193行 |
-| 04 | 台馬3號海底電纜破壞（Hai Hong Gong 66） | analyst-cyber | ~200行 |
-| 05 | 解放軍AI蜂群技術突破（對台IAMD威脅） | analyst-tech | ~210行 |
-| 06 | 中科院勁蜂四型無人機＋國際技術合作 | analyst-tech | ~200行 |
-| 07 | 96A戰車GL-6主動防護系統（第71軍） | analyst-tw-01 | ~210行 |
-| 08 | 中國黃海EEZ侵擾（浮標+水產養殖） | analyst-ecs | ~205行 |
-| 09 | 公安部監控Telegram（300億條+7000萬帳號） | analyst-cyber | 216行 |
-| 10 | 中國南鳥島EEZ稀土海洋調查（日本視角） | analyst-ecs | ~215行 |
-| 11 | UNIFIL中國前哨坐標外洩（黎巴嫩） | garde | ~218行 |
-
-**Git commit**: `2e883ad` (11份報告 + wiki同步) + `ba7b597` (HANDOVER + raw歸入)
-
-### ✅ B. 20人分析師子代理人系統（前半輪完成）
-- `.claude/settings.json` → `dangerouslySkipPermissions: true` + 完整工具權限
-- `team/profiles/` → 20個 `{analyst_id}.CLAUDE.md`（量身訂製 system prompt）
-- `team/sub_agent_runner.py` → 派遣引擎
-- `team/TEAM_OPS.md` → 操作手冊
-- **Git commit**: `f63d1cc` ✅
-
-### ✅ C. auto_analyze_raw.py 重建（本輪進行中）
-- 舊版已刪除，PostToolUse Hook 指向此檔失效
-- **本輪正在重建**（見 §4 Priority 1）
+- 來源檔案總數：17個.txt（含1個Grok彙整、16個Obsidian Web Clipper）+ 1個PDF
+- 主要來源：ISW（戰爭研究所）、TWZ（War Zone）、SeaLight Foundation、Manila Times、自由時報軍武頻道、X貼文
+- 最高威脅等級議題（🔴）：解放軍AI蜂群、台灣預算僵局、96A戰車升級、電纜破壞、美軍中東集結
 
 ---
 
-## 3. 目前面臨的問題 / 待解決事項 (Pending Fixes)
+## 3. 目前面臨的問題 / 待解決事項
 
-### 🔴 緊急
+### 已知問題
 
-**Issue #1：auto_analyze_raw.py 已刪除 → Hook 靜默失敗**
-- `.claude/settings.json` PostToolUse Hook：`python auto_analyze_raw.py 2>nul`
-- 檔案不存在 → 每次 Write/Edit 後 Hook 執行失敗但被 `2>nul` 壓制
-- **修復方案**：本輪重建此檔（見下方 §4）
+1. **CMSI PDF未納入本日分析**：Dr. Erickson關於解放軍海軍的學術論文已歸檔，需在下一輪補充分析
+2. **notifier.py主函數硬編碼路徑**：`__main__`區塊仍硬編碼為`20260331`舊報告路徑，應更新為動態取最新報告
+3. **_daily_output中有遺留的`nul`檔案**（來自舊版Windows路徑問題），應清理
 
-### 🟡 中優先
+### 未追蹤的次要情報
 
-**Issue #2：TESTING_MODE=true**
-- `.env` 中推播只寄至 garden94030@gmail.com（主信箱）
-- 改 `TESTING_MODE=false` 可推播至全部 5 位成員
-
-**Issue #3：wiki_compiler.py --team-sync PR 功能未驗證**
-- 分析師路由已測試，但 GitHub 自動開 PR 功能未實測
-
-**Issue #4：team/sub_agent_runner.py 實際呼叫 claude CLI 未測試**
-- dry-run 路由正確，但真實執行 `claude --dangerously-skip-permissions -p ...` 未驗證
-
-### 🟢 低優先
-
-**Issue #5：`wiki/_entities.md` 被修改但未 commit**
-**Issue #6：`.claude/settings.local.json` 被修改但未 commit**
+以下X貼文內容已收錄但未進行獨立深度分析：
+- @BAIGUANXINGSHU：航天投資公司副總經理詹鐘煒的舉報信（中共反腐動態）
+- @JaidevJamwal：印度烈火-5飛彈（Agni-V）覆蓋中國能力
+- @nuwangzi：聯黎部隊（UNIFIL）第226旅接近中國5-10號前哨營地
+- @AsiaMTI：南海能源勘探地圖更新（新區塊加入）
+- @CSISKoreaChair：黃海中韓臨時措施區浮標問題（13個浮標仍在）
 
 ---
 
-## 4. 下一階段發展建議 (Next Steps)
+## 4. 下一階段發展建議
 
-### 🔴 Priority 1：重建 auto_analyze_raw.py（本輪執行）
+**優先順序1（最高）**：處理CMSI PDF
+- 建立議題：「中共海軍人員結構與海上力量評估（Erickson CMSI報告）」
+- 將Dr. Erickson的學術分析與台海活動情資交叉比對
+- 建立`wiki/concepts/`條目（非事件類型）
 
-**功能需求**：
-1. 掃描 `wiki/raw/` 所有 `.md` 檔案
-2. 比對 `_processed_raw_log.json`，跳過已處理檔案
-3. 提取每個 raw 檔的 `title` + `source` + 正文前 500 字
-4. 呼叫 `team/team_router.py` 自動路由到最適分析師
-5. 複製 raw 檔內容到 `_daily_input/{date}_{filename}.txt`，供 analysis.py 處理
-6. 更新 `_processed_raw_log.json`，避免重複分析
+**優先順序2**：notifier.py修復
+- 更新`__main__`區塊，改為自動偵測`_daily_output/`中最新的報告檔案
+- 避免下次仍發送舊日期的報告
 
-```bash
-# 測試指令
-python auto_analyze_raw.py              # 掃描並處理所有未處理 raw 檔
-python auto_analyze_raw.py --dry-run   # 只顯示待處理清單，不執行
-python auto_analyze_raw.py --reset     # 清空 processed log，重新處理所有檔案
-```
-
-### 🟡 Priority 2：設定 TESTING_MODE=false + 全員推播測試
-確認 5 位成員信箱後改 `.env`，執行 `python notifier.py --test` 確認全員收到
-
-### 🟢 Priority 3：驗證 sub_agent_runner.py 實際執行
-```bash
-# 測試單一分析師實際呼叫（非dry-run）
-python team/sub_agent_runner.py \
-  --analyst analyst-scs-02 \
-  --task "今日南海AIS欺騙最新動態"
-# 觀察 claude CLI 是否正確啟動、輸出是否寫入 _daily_output/
-```
+**優先順序3**：建立次要議題wiki條目
+- 處理@BAIGUANXINGSHU中共反腐動態（可能涉及航天/軍工系統腐敗）
+- 建立黃海浮標問題的追蹤事件卡片（CSIS Korea Chair追蹤中）
+- 更新南海能源勘探地圖（AMTI）
 
 ---
 
-## 5. 關鍵指令快查
+## 附錄：本輪情資來源完整清單
 
-```bash
-# 子代理人系統
-python team/sub_agent_runner.py --list
-python team/sub_agent_runner.py --batch "關鍵字" --dry-run
-python team/sub_agent_runner.py --daily
-
-# Raw 自動分析（重建後）
-python auto_analyze_raw.py --dry-run
-python auto_analyze_raw.py
-
-# 每日流程
-python gmail_reader.py && python analysis.py
-python team/briefing_generator.py
-python notifier.py
-
-# 知識庫
-python wiki_health.py
-python wiki_compiler.py --team-sync
-
-# Git
-git add -A && git commit -m "..." && git push origin main
-```
-
----
-
-## 6. Git 版本歷史（本輪）
-
-| Commit | 說明 |
-|--------|------|
-| `ba7b597` | HANDOVER.md + wiki/raw/ 18份歸入 |
-| `2e883ad` | 11議題深度分析完成 + wiki同步 |
-| `f63d1cc` | 20人子代理人系統建置 (v2.0) |
-| `77a1dfc` | 核武報告擴寫 + CLAUDE.md報告法典 |
-
----
-
-*本文件由 Claude Code 自動生成 | 2026-04-04 05:44（台北時間 UTC+8）*
+| 序號 | 來源 | 日期 | 分析議題 |
+|------|------|------|----------|
+| 1 | Grok每日彙整（noreply@x.ai） | 2026-04-04 | 01, 03, 08 |
+| 2 | ISW China & Taiwan Update（Adam Grace） | 2026-04-03 | 01, 02 |
+| 3 | TWZ Carrier Tracker（Ian Ellis-Jones） | 2026-04-03 | 08 |
+| 4 | @SeaLightFound | 2026-04-01 | 04 |
+| 5 | @TheManilaTimes | 2026-04-04 | 06 |
+| 6 | @supbrow（Charlie B） | 2026-04-03 | 06, 10 |
+| 7 | @cnpoliwatch | 2026-04-04 | 07 |
+| 8 | @Byron_Wan | 2026-04-03 | 技術竊密（未獨立議題） |
+| 9 | @new27brigade（渡海+戰車） | 2026-04-04 | 03, 09 |
+| 10 | @new27brigade（C-130J） | 2026-04-04 | 09 |
+| 11 | 自由時報軍武頻道（中科院） | 2026-04-04 | 05 |
+| 12 | @Sankei_news | 2026-04-04 | 南鳥島EEZ（未獨立議題） |
+| 13 | @AsiaMTI | 2026-04-04 | 南海能源（未獨立議題） |
+| 14 | @CSISKoreaChair | 2026-04-03 | 黃海浮標（未獨立議題） |
+| 15 | @nuwangzi | 2026-04-03 | UNIFIL/中國前哨（未獨立） |
+| 16 | @JaidevJamwal | 2026-04-04 | 印度ICBM（周邊） |
+| 17 | @NetAskari | 2026-04-04 | 07（CAC法規輔助） |
+| 18 | @BAIGUANXINGSHU | 2026-04-04 | 反腐（未獨立議題） |
+| PDF | CMSI / Erickson（Fall-Winter 2025） | 已歸檔 | 待下輪處理 |
