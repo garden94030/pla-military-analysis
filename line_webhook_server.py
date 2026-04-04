@@ -21,6 +21,8 @@ import hashlib
 import base64
 import logging
 import re
+import subprocess
+import threading
 import requests
 from pathlib import Path
 from datetime import datetime
@@ -259,6 +261,114 @@ def save_to_input(title: str, content: str, source_tag: str = "LINE") -> Path:
     return filepath
 
 
+# ── Dispatch 指令 ─────────────────────────────────────────
+DISPATCH_BAT = WORKSPACE / "run_daily_analysis.bat"
+_analysis_lock = threading.Lock()
+_analysis_running = False   # 防止重複觸發
+
+DISPATCH_COMMANDS = {"!立即分析", "!分析", "!dispatch", "!run"}
+STATUS_COMMANDS   = {"!狀態", "!status", "!state"}
+HELP_COMMANDS     = {"!help", "!說明", "!指令"}
+
+def _run_analysis_bg(reply_token: str):
+    """在背景執行分析，完成後推送通知"""
+    global _analysis_running
+    try:
+        log.info("🚀 [Dispatch] 啟動每日分析...")
+        result = subprocess.run(
+            ["cmd", "/c", str(DISPATCH_BAT)],
+            cwd=str(WORKSPACE),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=3600,   # 最長等 1 小時
+        )
+        if result.returncode == 0:
+            log.info("✅ [Dispatch] 分析完成")
+        else:
+            log.error(f"❌ [Dispatch] 分析失敗 (code {result.returncode})\n{result.stderr[:500]}")
+    except subprocess.TimeoutExpired:
+        log.error("❌ [Dispatch] 分析逾時（超過 1 小時）")
+    except Exception as e:
+        log.error(f"❌ [Dispatch] 例外: {e}")
+    finally:
+        _analysis_running = False
+
+
+def handle_dispatch(reply_token: str) -> bool:
+    """處理 !立即分析 等指令，回傳 True 表示已處理"""
+    global _analysis_running
+
+    if _analysis_running:
+        reply(reply_token,
+              "⏳ 分析已在執行中，請稍候...\n完成後將自動發送 Email 與 LINE 通知。")
+        return True
+
+    if not DISPATCH_BAT.exists():
+        reply(reply_token, f"❌ 找不到執行腳本：{DISPATCH_BAT}")
+        return True
+
+    with _analysis_lock:
+        if _analysis_running:   # double-check
+            reply(reply_token, "⏳ 分析已在執行中，請稍候...")
+            return True
+        _analysis_running = True
+
+    reply(reply_token,
+          "🚀 已啟動每日分析！\n\n"
+          "⏱️ 預計需要 10–20 分鐘\n"
+          "📧 完成後自動發送 Email 與 LINE 通知\n"
+          "─────────────────\n"
+          "傳 !狀態 可查詢目前進度")
+
+    t = threading.Thread(target=_run_analysis_bg, args=(reply_token,), daemon=True)
+    t.start()
+    return True
+
+
+def handle_status(reply_token: str) -> bool:
+    """處理 !狀態 指令"""
+    # 最新報告
+    output_dir = WORKSPACE / "_daily_output"
+    reports = sorted(output_dir.glob("*中共軍事動態綜合分析報告.md"), reverse=True)
+    latest = reports[0].name if reports else "（尚無報告）"
+
+    # 待處理檔案
+    waiting = list((WORKSPACE / "_daily_input").glob("*.txt"))
+
+    # 分析狀態
+    status_icon = "🔄 執行中" if _analysis_running else "✅ 閒置"
+
+    text = (
+        f"📊 系統狀態\n"
+        f"─────────────────\n"
+        f"分析引擎：{status_icon}\n"
+        f"最新報告：{latest}\n"
+        f"待處理檔案：{len(waiting)} 個\n"
+        f"─────────────────\n"
+        f"指令：!立即分析 / !狀態 / !說明"
+    )
+    reply(reply_token, text)
+    return True
+
+
+def handle_help(reply_token: str) -> bool:
+    """處理 !說明 指令"""
+    text = (
+        "📖 可用指令\n"
+        "─────────────────\n"
+        "!立即分析　立即執行今日情資分析\n"
+        "!狀態　　　查看系統與分析進度\n"
+        "!說明　　　顯示此說明\n"
+        "─────────────────\n"
+        "傳送 URL 或文字 → 自動存入待分析資料夾\n"
+        "完成後由 Email 與 LINE 通知結果"
+    )
+    reply(reply_token, text)
+    return True
+
+
 # ── 主要 Webhook 邏輯 ─────────────────────────────────────
 def handle_message(event: dict):
     """處理單一 LINE 訊息事件"""
@@ -272,6 +382,18 @@ def handle_message(event: dict):
         return
 
     log.info(f"收到訊息: {text[:100]}")
+
+    # ── 指令攔截（優先於 URL 偵測）────────────────────────
+    cmd = text.lower().strip()
+    if text in DISPATCH_COMMANDS or cmd in DISPATCH_COMMANDS:
+        handle_dispatch(reply_token)
+        return
+    if text in STATUS_COMMANDS or cmd in STATUS_COMMANDS:
+        handle_status(reply_token)
+        return
+    if text in HELP_COMMANDS or cmd in HELP_COMMANDS:
+        handle_help(reply_token)
+        return
 
     urls = extract_urls(text)
 
