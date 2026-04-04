@@ -1,0 +1,104 @@
+{
+  "monitoring_zones": [
+    {
+      "name": "Taiwan Strait",
+      "name_zh": "台灣海峽",
+      "bbox": [117.0, 22.0, 121.0, 26.0],
+      "priority": "critical",
+      "monitor_types": ["maritime_militia", "ccg_patrol", "ais_dark", "cable_threat"]
+    },
+    {
+      "name": "Taiwan ADIZ - Southwest",
+      "name_zh": "台灣防空識別區-西南空域",
+      "bbox": [117.0, 20.0, 121.0, 24.0],
+      "priority": "critical",
+      "monitor_types": ["adiz_incursion"],
+      "notes": "Most frequent PLA ADIZ incursion sector"
+    },
+    {
+      "name": "Kinmen/Matsu Waters",
+      "name_zh": "金門/馬祖水域",
+      "bbox": [118.0, 24.0, 120.5, 26.5],
+      "priority": "critical",
+      "monitor_types": ["ccg_patrol", "maritime_militia", "cable_threat"],
+      "notes": "Restricted/prohibited zone boundary; frequent CCG incursions post-2024"
+    },
+    {
+      "name": "Pratas/Dongsha Island",
+      "name_zh": "東沙島",
+      "bbox": [116.0, 20.0, 117.5, 21.0],
+      "priority": "high",
+      "monitor_types": ["ccg_patrol", "maritime_militia"]
+    },
+    {
+      "name": "Luzon Strait - Sensor Zone",
+      "name_zh": "呂宋海峽-感測器區",
+      "bbox": [119.0, 18.5, 123.0, 22.0],
+      "priority": "critical",
+      "monitor_types": ["research_vessel", "subsea_sensor"],
+      "notes": "Reuters 2026: PRC advanced sensors deployed for submarine transit detection"
+    },
+    {
+      "name": "East Taiwan - Pacific Approaches",
+      "name_zh": "台灣東部-太平洋入口",
+      "bbox": [121.5, 22.0, 126.0, 26.0],
+      "priority": "high",
+      "monitor_types": ["research_vessel", "ais_dark", "military_exercise"]
+    },
+    {
+      "name": "Taiwan Submarine Cable Corridors",
+      "name_zh": "台灣海底電纜走廊",
+      "zones": [
+        {"name": "Tamsui Landing", "bbox": [121.3, 25.0, 121.8, 25.5]},
+        {"name": "Toucheng Landing", "bbox": [121.7, 24.7, 122.2, 25.0]},
+        {"name": "Fangshan Landing", "bbox": [120.5, 21.8, 121.0, 22.2]},
+        {"name": "Kaohsiung Landing", "bbox": [120.1, 22.3, 120.6, 22.8]}
+      ],
+      "priority": "critical",
+      "monitor_types": ["cable_threat"],
+      "notes": "14+ submarine cables connect Taiwan to global internet"
+    }
+  ],
+  "data_sources": {
+    "global_fishing_watch": {
+      "url": "https://globalfishingwatch.org/",
+      "api": "https://gateway.api.globalfishingwatch.org/v3",
+      "data_type": "AIS + fishing effort",
+      "cost": "free (research access)",
+      "notes": "Baseline for distinguishing fishing vs gray zone behavior"
+    },
+    "taiwan_mnd_adiz": {
+      "url": "https://www.mnd.gov.tw/",
+      "data_type": "Daily ADIZ violation reports",
+      "cost": "free (public)",
+      "notes": "Daily PLA aircraft ADIZ incursion reports published by Taiwan MND"
+    },
+    "taiwan_adiz_dataset": {
+      "description": "Taiwan ADIZ Violations Dataset",
+      "compilers": ["Gerald C. Brown", "Ben Lewis", "Alex Kung"],
+      "source": "ROC Ministry of National Defense",
+      "format": "Google Spreadsheet / CSV",
+      "notes": "Compiled historical ADIZ violation data"
+    },
+    "tsm_gmu": {
+      "url": "https://tsm.schar.gmu.edu/",
+      "data_type": "OSINT analysis + CCG incident tracker",
+      "cost": "free",
+      "notes": "George Mason University Taiwan Security Monitor"
+    },
+    "csis_shadow_signals": {
+      "url": "https://www.csis.org/programs/futures-lab/projects/shadow-signals-using-big-data-and-geospatial-analysis-track-gray-zone",
+      "data_type": "Multi-source fusion (AIS + ADS-B + satellite + GFW)",
+      "notes": "CSIS gray zone vessel classification framework"
+    }
+  },
+  "alert_thresholds": {
+    "ais_dark_hours": 6,
+    "loitering_hours_in_drill_zone": 72,
+    "ccg_deployment_days": 30,
+    "adiz_incursion_aircraft_count_elevated": 10,
+    "adiz_incursion_aircraft_count_critical": 30,
+    "cable_zone_proximity_nm": 5,
+    "research_vessel_survey_days": 7
+  }
+}

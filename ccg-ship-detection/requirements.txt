@@ -1,0 +1,32 @@
+# CCG Ship Detection Dataset - Dependencies
+# 中共海警船偵測資料集 - 依賴套件
+
+# Core
+numpy>=1.24.0
+opencv-python>=4.8.0
+Pillow>=10.0.0
+requests>=2.31.0         # HTTP API 呼叫
+python-dotenv>=1.0.0     # .env 環境變數載入
+
+# Satellite imagery - CDSE (Copernicus Data Space Ecosystem)
+rasterio>=1.3.0          # 地理空間柵格 I/O
+pyproj>=3.6.0            # 座標轉換
+shapely>=2.0.0           # 幾何運算
+
+# Annotation tools
+labelImg>=1.8.6          # GUI 標註工具
+# cvat-sdk>=2.7.0        # CVAT API (選用，協作標註)
+
+# Data augmentation
+albumentations>=1.3.0    # 影像增強管線
+
+# Object detection
+ultralytics>=8.1.0       # YOLOv8
+
+# Visualization & analysis
+matplotlib>=3.7.0
+seaborn>=0.12.0
+pandas>=2.0.0
+
+# AIS data processing
+# aislib>=0.1.0          # AIS 訊息解析 (選用)

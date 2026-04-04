@@ -1,0 +1,38 @@
+# Environment
+.env
+*.env.local
+
+# Dataset files (too large for git)
+datasets/raw/**/*.tif
+datasets/raw/**/*.tiff
+datasets/raw/**/*.jp2
+datasets/raw/**/*.zip
+datasets/images/train/*.png
+datasets/images/train/*.jpg
+datasets/images/val/*.png
+datasets/images/val/*.jpg
+datasets/images/test/*.png
+datasets/images/test/*.jpg
+
+# Model weights
+models/*.pt
+models/*.onnx
+models/*.engine
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Keep .gitkeep files
+!**/.gitkeep

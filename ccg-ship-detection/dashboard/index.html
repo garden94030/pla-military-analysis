@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCG Ship Detection &amp; Taiwan Gray Zone Monitor</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2235;
+  --border: #2d3748;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-red: #ef4444;
+  --accent-orange: #f59e0b;
+  --accent-green: #22c55e;
+  --accent-purple: #a855f7;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'SF Pro Display', -apple-system, 'Noto Sans TC', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Header - mobile first */
+.header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.header h1 {
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.header .subtitle { font-size: 10px; color: var(--text-secondary); }
+.header .datetime { font-size: 11px; color: var(--accent-cyan); font-family: monospace; white-space: nowrap; }
+@media (min-width: 768px) {
+  .header { padding: 12px 24px; }
+  .header h1 { font-size: 18px; }
+  .header .subtitle { font-size: 12px; }
+  .header .datetime { font-size: 13px; }
+}
+
+/* Threat Level Banner */
+.threat-banner {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.5s;
+  flex-wrap: wrap;
+}
+@media (min-width: 768px) {
+  .threat-banner { padding: 10px 24px; gap: 16px; font-size: 14px; flex-wrap: nowrap; }
+}
+.threat-banner.GREEN { background: linear-gradient(90deg, rgba(34,197,94,0.15), transparent); color: var(--accent-green); }
+.threat-banner.YELLOW { background: linear-gradient(90deg, rgba(245,158,11,0.2), transparent); color: var(--accent-orange); }
+.threat-banner.ORANGE { background: linear-gradient(90deg, rgba(249,115,22,0.25), transparent); color: #f97316; }
+.threat-banner.RED { background: linear-gradient(90deg, rgba(239,68,68,0.25), transparent); color: var(--accent-red); animation: pulse-red 2s infinite; }
+@keyframes pulse-red { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+.threat-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  animation: blink 1.5s infinite;
+}
+.threat-banner.GREEN .threat-dot { background: var(--accent-green); }
+.threat-banner.YELLOW .threat-dot { background: var(--accent-orange); }
+.threat-banner.ORANGE .threat-dot { background: #f97316; }
+.threat-banner.RED .threat-dot { background: var(--accent-red); }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* Dashboard Grid - Mobile First */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 10px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .dashboard { grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 24px; }
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+@media (min-width: 768px) { .card-header { padding: 12px 16px; align-items: center; flex-wrap: nowrap; } }
+.card-header h2 { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+@media (min-width: 768px) { .card-header h2 { font-size: 14px; letter-spacing: 1px; } }
+.card-body { padding: 12px; }
+@media (min-width: 768px) { .card-body { padding: 16px; } }
+
+/* Map - full width, taller on desktop */
+.map-card { grid-column: 1 / -1; }
+#map { height: 300px; background: var(--bg-secondary); border-radius: 0 0 10px 10px; }
+@media (min-width: 768px) { #map { height: 420px; } }
+@media (min-width: 1200px) { #map { height: 500px; } }
+
+/* Stats Grid - 2 cols on mobile, 4 on desktop */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+@media (min-width: 768px) { .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; } }
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+}
+@media (min-width: 768px) { .stat-card { padding: 16px; } }
+.stat-value { font-size: 26px; font-weight: 700; color: var(--accent-cyan); }
+@media (min-width: 768px) { .stat-value { font-size: 32px; } }
+.stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; line-height: 1.3; }
+@media (min-width: 768px) { .stat-label { font-size: 12px; margin-top: 4px; } }
+.stat-trend { font-size: 10px; margin-top: 4px; }
+@media (min-width: 768px) { .stat-trend { font-size: 11px; margin-top: 6px; } }
+.stat-trend.up { color: var(--accent-red); }
+.stat-trend.down { color: var(--accent-green); }
+
+/* Event Timeline */
+.event-list { max-height: 320px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+@media (min-width: 768px) { .event-list { max-height: 360px; } }
+.event-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.event-item:active { background: rgba(59,130,246,0.12); }
+@media (min-width: 768px) {
+  .event-item { padding: 10px 16px; gap: 12px; }
+  .event-item:hover { background: rgba(59,130,246,0.08); }
+}
+.event-dot {
+  width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+}
+.event-dot.critical { background: var(--accent-red); }
+.event-dot.high { background: var(--accent-orange); }
+.event-dot.medium { background: var(--accent-blue); }
+.event-dot.low { background: var(--accent-green); }
+.event-time { font-size: 10px; color: var(--text-secondary); font-family: monospace; }
+@media (min-width: 768px) { .event-time { font-size: 11px; } }
+.event-title { font-size: 12px; font-weight: 500; line-height: 1.3; }
+@media (min-width: 768px) { .event-title { font-size: 13px; } }
+.event-detail { font-size: 10px; color: var(--text-secondary); margin-top: 2px; line-height: 1.3; }
+@media (min-width: 768px) { .event-detail { font-size: 11px; } }
+
+/* Chart - shorter on mobile */
+.chart-container { position: relative; height: 220px; }
+@media (min-width: 768px) { .chart-container { height: 280px; } }
+
+/* Vessel table - horizontal scroll on mobile */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.vessel-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 420px; }
+@media (min-width: 768px) { .vessel-table { font-size: 12px; min-width: auto; } }
+.vessel-table th {
+  text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--border);
+  color: var(--text-secondary); font-weight: 500; text-transform: uppercase; font-size: 10px;
+  white-space: nowrap;
+}
+@media (min-width: 768px) { .vessel-table th { padding: 8px 10px; font-size: 11px; } }
+.vessel-table td { padding: 8px 8px; border-bottom: 1px solid rgba(45,55,72,0.5); }
+@media (min-width: 768px) { .vessel-table td { padding: 8px 10px; } }
+.vessel-table tr:hover { background: rgba(59,130,246,0.05); }
+.vessel-status { display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 9px; font-weight: 600; white-space: nowrap; }
+@media (min-width: 768px) { .vessel-status { padding: 2px 8px; font-size: 10px; } }
+.vessel-status.active { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+.vessel-status.monitoring { background: rgba(245,158,11,0.15); color: var(--accent-orange); }
+.vessel-status.last-seen { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+
+/* Filter Bar - touch-friendly */
+.filter-bar {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 6px 10px; border-radius: 16px; font-size: 11px; cursor: pointer;
+  border: 1px solid var(--border); background: transparent; color: var(--text-secondary);
+  transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+@media (min-width: 768px) { .filter-btn { padding: 4px 12px; } }
+.filter-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.filter-btn.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+
+/* Mobile vessel cards (alternative to table on very small screens) */
+.vessel-cards { display: none; }
+@media (max-width: 480px) {
+  .table-scroll { display: none; }
+  .vessel-cards { display: block; }
+  .vessel-card-item {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .vessel-card-item:active { background: rgba(59,130,246,0.08); }
+  .vc-name { font-size: 13px; font-weight: 600; }
+  .vc-sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+  .vc-right { text-align: right; }
+  .vc-days { font-size: 18px; font-weight: 700; color: var(--accent-cyan); }
+  .vc-days-label { font-size: 9px; color: var(--text-secondary); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* PWA / iOS safe area */
+@supports (padding: env(safe-area-inset-top)) {
+  .header { padding-top: max(10px, env(safe-area-inset-top)); }
+}
+
+/* Landscape phone optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  #map { height: 250px; }
+  .chart-container { height: 180px; }
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <h1>CCG Ship Detection & Taiwan Gray Zone Monitor</h1>
+    <div class="subtitle">中共海警船偵測暨台灣灰色地帶態勢監測儀表板</div>
+  </div>
+  <div class="datetime" id="clock"></div>
+</div>
+
+<!-- Threat Level Banner -->
+<div class="threat-banner YELLOW" id="threat-banner">
+  <div class="threat-dot"></div>
+  <span>威脅等級: YELLOW — 升高的灰色地帶活動</span>
+  <span style="margin-left:auto;font-size:12px;opacity:0.7">SCORE: 42/100</span>
+</div>
+
+<!-- Stats -->
+<div class="dashboard">
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value" style="color:var(--accent-red)">7</div>
+    <div class="stat-label">AIS 暗船事件 (24h)</div>
+    <div class="stat-trend up">+3 vs 昨日</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color:var(--accent-orange)">12</div>
+    <div class="stat-label">ADIZ 入侵架次 (今日)</div>
+    <div class="stat-trend up">+4 vs 7日均值</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color:var(--accent-purple)">3</div>
+    <div class="stat-label">海警船部署中</div>
+    <div class="stat-trend">含 CCG 5901</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color:var(--accent-cyan)">2</div>
+    <div class="stat-label">科考船活動中</div>
+    <div class="stat-trend">東方紅3號 + 向陽紅09</div>
+  </div>
+</div>
+
+<!-- Map -->
+<div class="card map-card">
+  <div class="card-header">
+    <h2>即時態勢地圖 (Situation Map)</h2>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="toggleLayer('ccg')">海警船</button>
+      <button class="filter-btn active" onclick="toggleLayer('research')">科考船</button>
+      <button class="filter-btn active" onclick="toggleLayer('militia')">疑似民兵</button>
+      <button class="filter-btn active" onclick="toggleLayer('zones')">監測區</button>
+      <button class="filter-btn active" onclick="toggleLayer('cables')">海底電纜</button>
+    </div>
+  </div>
+  <div id="map"></div>
+</div>
+
+<!-- Event Timeline -->
+<div class="card">
+  <div class="card-header">
+    <h2>事件時間線 (Event Timeline)</h2>
+    <span style="font-size:11px;color:var(--text-secondary)">最近 48 小時</span>
+  </div>
+  <div class="event-list" id="event-list"></div>
+</div>
+
+<!-- Charts -->
+<div class="card">
+  <div class="card-header">
+    <h2>ADIZ 入侵趨勢 (30 日)</h2>
+  </div>
+  <div class="card-body">
+    <div class="chart-container"><canvas id="adizChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Vessel Class Distribution -->
+<div class="card">
+  <div class="card-header">
+    <h2>偵測分類分布 (Detection Classes)</h2>
+  </div>
+  <div class="card-body">
+    <div class="chart-container"><canvas id="classChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Tracked Vessels Table -->
+<div class="card">
+  <div class="card-header">
+    <h2>追蹤中的重點船舶 (Priority Vessels)</h2>
+  </div>
+  <div class="card-body" style="padding:0">
+    <div class="table-scroll">
+      <table class="vessel-table">
+        <thead>
+          <tr><th>船名</th><th>類型</th><th>位置</th><th>狀態</th><th>天數</th></tr>
+        </thead>
+        <tbody id="vessel-table-body"></tbody>
+      </table>
+    </div>
+    <div class="vessel-cards" id="vessel-cards"></div>
+  </div>
+</div>
+
+</div><!-- dashboard -->
+
+<script>
+// === Clock ===
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toISOString().replace('T',' ').substring(0,19) + ' UTC';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// === Map ===
+const map = L.map('map', { zoomControl: true }).setView([20, 120], 4);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  maxZoom: 18
+}).addTo(map);
+
+// Monitoring zones
+const zones = [
+  {name:'台灣海峽', bbox:[[22,117],[26,121]], color:'#f59e0b', priority:'critical'},
+  {name:'尖閣諸島/釣魚台', bbox:[[25.5,123],[26.5,124.5]], color:'#ef4444', priority:'critical'},
+  {name:'黃岩島', bbox:[[15,117.5],[16,118.5]], color:'#f59e0b', priority:'high'},
+  {name:'仁愛暗沙', bbox:[[9.5,115.5],[10.5,116.5]], color:'#f59e0b', priority:'high'},
+  {name:'關島周邊', bbox:[[12,143],[15,146]], color:'#ef4444', priority:'critical'},
+  {name:'呂宋海峽', bbox:[[18.5,119],[22,123]], color:'#ef4444', priority:'critical'},
+  {name:'菲律賓海', bbox:[[8,124],[20,135]], color:'#3b82f6', priority:'high'},
+  {name:'馬六甲海峽入口', bbox:[[0,93],[8,105]], color:'#3b82f6', priority:'high'},
+  {name:'東經90度海嶺', bbox:[[-5,88],[15,92]], color:'#a855f7', priority:'high'},
+  {name:'夏威夷周邊', bbox:[[18,-162],[23,-154]], color:'#3b82f6', priority:'high'},
+  {name:'金門/馬祖', bbox:[[24,118],[26.5,120.5]], color:'#ef4444', priority:'critical'},
+  {name:'東沙島', bbox:[[20,116],[21,117.5]], color:'#f59e0b', priority:'high'},
+];
+const zoneLayers = L.layerGroup().addTo(map);
+zones.forEach(z => {
+  L.rectangle(z.bbox, {
+    color: z.color, weight: 1, fillOpacity: 0.08, dashArray: '5,5'
+  }).bindPopup(`<b>${z.name}</b><br>優先級: ${z.priority}`).addTo(zoneLayers);
+});
+
+// Submarine cable routes (simplified)
+const cableLayers = L.layerGroup().addTo(map);
+const cables = [
+  {name:'APCN-2', points:[[25.15,121.45],[22.5,120.3],[13.5,121.0],[1.3,103.8]]},
+  {name:'SEA-ME-WE 3', points:[[25.15,121.45],[22.2,120.5],[9.0,109.0],[1.3,103.8]]},
+  {name:'TPE', points:[[25.15,121.45],[35.0,139.7]]},
+  {name:'FASTER', points:[[24.8,121.75],[35.0,139.7],[21.3,-158.0]]},
+];
+cables.forEach(c => {
+  L.polyline(c.points, {color:'#06b6d4', weight:1.5, opacity:0.4, dashArray:'3,6'})
+    .bindPopup(`<b>海底電纜: ${c.name}</b>`).addTo(cableLayers);
+});
+
+// CCG Vessels
+const ccgLayers = L.layerGroup().addTo(map);
+const ccgVessels = [
+  {name:'CCG 5901', lat:15.8, lon:117.7, type:'大型巡邏艦', status:'active', days:87},
+  {name:'CCG 3901', lat:25.7, lon:123.5, type:'大型巡邏艦', status:'active', days:14},
+  {name:'CCG 1305', lat:24.5, lon:119.2, type:'中型巡邏艦', status:'active', days:7},
+];
+ccgVessels.forEach(v => {
+  L.circleMarker([v.lat, v.lon], {
+    radius: 8, fillColor: '#ef4444', color: '#fff', weight: 2, fillOpacity: 0.9
+  }).bindPopup(`<b>${v.name}</b><br>${v.type}<br>部署天數: ${v.days}`).addTo(ccgLayers);
+});
+
+// Research Vessels
+const researchLayers = L.layerGroup().addTo(map);
+const researchVessels = [
+  {name:'東方紅3號', lat:7.5, lon:97.3, type:'科考船', status:'active', note:'馬六甲入口勘測'},
+  {name:'向陽紅09', lat:20.2, lon:130.5, type:'科考船', status:'active', note:'菲律賓海海底測繪'},
+  {name:'科學號', lat:29.0, lon:128.0, type:'科考船', status:'last-seen', note:'日本以東感測器檢查'},
+];
+researchVessels.forEach(v => {
+  L.circleMarker([v.lat, v.lon], {
+    radius: 7, fillColor: '#a855f7', color: '#fff', weight: 2, fillOpacity: 0.9
+  }).bindPopup(`<b>${v.name}</b><br>${v.type}<br>${v.note}`).addTo(researchLayers);
+});
+
+// Suspected Militia
+const militiaLayers = L.layerGroup().addTo(map);
+const militiaClusters = [
+  {lat:24.8, lon:119.8, count:12, note:'金門水域集結'},
+  {lat:15.5, lon:117.8, count:8, note:'黃岩島滯留'},
+  {lat:20.6, lon:116.5, count:5, note:'東沙島附近'},
+];
+militiaClusters.forEach(c => {
+  L.circleMarker([c.lat, c.lon], {
+    radius: 12, fillColor: '#f59e0b', color: '#f59e0b', weight: 1, fillOpacity: 0.3
+  }).bindPopup(`<b>疑似民兵船隊</b><br>船隻數: ${c.count}<br>${c.note}`).addTo(militiaLayers);
+});
+
+// Legend
+const legend = L.control({position: 'bottomright'});
+legend.onAdd = function() {
+  const div = L.DomUtil.create('div');
+  div.style.cssText = 'background:rgba(26,34,53,0.95);padding:10px 14px;border-radius:8px;font-size:11px;color:#e2e8f0;border:1px solid #2d3748';
+  div.innerHTML = `
+    <div style="font-weight:600;margin-bottom:6px">圖例</div>
+    <div><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-right:6px"></span>海警船 CCG</div>
+    <div><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#a855f7;margin-right:6px"></span>科考船 Research</div>
+    <div><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:6px"></span>疑似民兵 Militia</div>
+    <div><span style="display:inline-block;width:2px;height:10px;background:#06b6d4;margin-right:8px;margin-left:4px"></span>海底電纜 Cables</div>
+    <div><span style="display:inline-block;width:10px;height:10px;border:1px dashed #f59e0b;margin-right:6px"></span>監測區 Zones</div>
+  `;
+  return div;
+};
+legend.addTo(map);
+
+// Layer toggle
+const layerMap = { ccg: ccgLayers, research: researchLayers, militia: militiaLayers, zones: zoneLayers, cables: cableLayers };
+function toggleLayer(name) {
+  const layer = layerMap[name];
+  if (!layer) return;
+  const btn = event.target;
+  if (map.hasLayer(layer)) { map.removeLayer(layer); btn.classList.remove('active'); }
+  else { map.addLayer(layer); btn.classList.add('active'); }
+}
+
+// === Events Timeline ===
+const events = [
+  {time:'2026-03-26 11:42',type:'ais_dark',sev:'critical',title:'AIS 暗船: 中國漁船 MMSI 413xxxxxx',detail:'台灣海峽西南，信號消失 14 小時'},
+  {time:'2026-03-26 10:15',type:'ccg_patrol',sev:'high',title:'CCG 5901 進入菲律賓 EEZ',detail:'黃岩島以西 32 海浬，部署第 87 天'},
+  {time:'2026-03-26 09:30',type:'adiz',sev:'high',title:'ADIZ 入侵: J-16 x4, KJ-500 x1',detail:'西南空域，未越中線'},
+  {time:'2026-03-26 08:00',type:'research',sev:'medium',title:'東方紅3號: 割草式航行偵測',detail:'馬六甲海峽入口，疑似海底測繪'},
+  {time:'2026-03-26 06:30',type:'militia',sev:'high',title:'民兵船隊集結: 金門水域',detail:'12 艘中國漁船，非捕魚行為，滯留 96h'},
+  {time:'2026-03-26 03:00',type:'ais_dark',sev:'medium',title:'AIS 暗船: 3 艘船南海同時消失',detail:'西沙群島東南，信號間隔 8 小時'},
+  {time:'2026-03-25 22:00',type:'adiz',sev:'medium',title:'ADIZ 入侵: H-6K x2',detail:'西南空域，常態巡邏'},
+  {time:'2026-03-25 18:30',type:'cable',sev:'high',title:'可疑活動: 淡水海纜登陸點',detail:'不明船舶在 APCN-2 電纜路線上方漂流 4 小時'},
+  {time:'2026-03-25 14:00',type:'research',sev:'medium',title:'向陽紅09: 抵達菲律賓海',detail:'從呂宋海峽東行，攜帶測繪設備'},
+  {time:'2026-03-25 10:00',type:'satellite',sev:'low',title:'衛星偵測: Sentinel-2 新影像',detail:'台灣海峽，雲量 15%，已入列處理佇列'},
+];
+const eventList = document.getElementById('event-list');
+events.forEach(e => {
+  const div = document.createElement('div');
+  div.className = 'event-item';
+  div.innerHTML = `
+    <div class="event-dot ${e.sev}"></div>
+    <div>
+      <div class="event-time">${e.time} UTC</div>
+      <div class="event-title">${e.title}</div>
+      <div class="event-detail">${e.detail}</div>
+    </div>
+  `;
+  eventList.appendChild(div);
+});
+
+// === ADIZ Chart ===
+const adizCtx = document.getElementById('adizChart').getContext('2d');
+const adizDates = Array.from({length:30}, (_,i) => {
+  const d = new Date(); d.setDate(d.getDate() - 29 + i);
+  return `${d.getMonth()+1}/${d.getDate()}`;
+});
+const adizData = [4,6,3,8,5,12,15,7,4,6,3,8,22,35,18,9,6,4,7,5,8,6,4,10,14,8,6,9,12,12];
+new Chart(adizCtx, {
+  type: 'bar',
+  data: {
+    labels: adizDates,
+    datasets: [{
+      label: 'ADIZ 入侵架次',
+      data: adizData,
+      backgroundColor: adizData.map(v => v >= 30 ? '#ef4444' : v >= 10 ? '#f59e0b' : '#3b82f6'),
+      borderRadius: 3,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          afterBody: (items) => {
+            const v = items[0].raw;
+            if (v >= 30) return 'CRITICAL';
+            if (v >= 10) return 'ELEVATED';
+            return '';
+          }
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#64748b', font: {size:10} }, grid: {display:false} },
+      y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(45,55,72,0.3)' } }
+    }
+  }
+});
+
+// === Class Distribution Chart ===
+const classCtx = document.getElementById('classChart').getContext('2d');
+new Chart(classCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['大型巡邏艦','中型巡邏艦','巡邏艇','快艇','輔助船','科考船','海洋感測器'],
+    datasets: [{
+      data: [8, 15, 33, 14, 5, 19, 6],
+      backgroundColor: ['#ef4444','#f97316','#f59e0b','#22c55e','#3b82f6','#a855f7','#06b6d4'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '55%',
+    plugins: {
+      legend: {
+        position: window.innerWidth < 768 ? 'bottom' : 'right',
+        labels: { color: '#94a3b8', font: {size: window.innerWidth < 768 ? 10 : 11}, padding: window.innerWidth < 768 ? 8 : 12 }
+      }
+    }
+  }
+});
+
+// === Vessel Table ===
+const vessels = [
+  {name:'CCG 5901',name_zh:'海警5901',type:'大型巡邏艦',loc:'15.8N, 117.7E',status:'active',days:87},
+  {name:'CCG 3901',name_zh:'海警3901',type:'大型巡邏艦',loc:'25.7N, 123.5E',status:'active',days:14},
+  {name:'東方紅3號',name_zh:'Dong Fang Hong 3',type:'科考船',loc:'7.5N, 97.3E',status:'active',days:42},
+  {name:'向陽紅09',name_zh:'Xiang Yang Hong 09',type:'科考船',loc:'20.2N, 130.5E',status:'active',days:18},
+  {name:'科學號',name_zh:'Ke Xue Hao',type:'科考船',loc:'29.0N, 128.0E',status:'last-seen',days:5},
+  {name:'CCG 1305',name_zh:'海警1305',type:'中型巡邏艦',loc:'24.5N, 119.2E',status:'monitoring',days:7},
+];
+const tbody = document.getElementById('vessel-table-body');
+vessels.forEach(v => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><b>${v.name}</b><br><span style="font-size:10px;color:#64748b">${v.name_zh}</span></td>
+    <td>${v.type}</td>
+    <td style="font-family:monospace;font-size:11px">${v.loc}</td>
+    <td><span class="vessel-status ${v.status}">${v.status === 'active' ? '活動中' : v.status === 'monitoring' ? '監控中' : '最後偵測'}</span></td>
+    <td>${v.days}d</td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// === Mobile Vessel Cards ===
+const vcards = document.getElementById('vessel-cards');
+vessels.forEach(v => {
+  const div = document.createElement('div');
+  div.className = 'vessel-card-item';
+  const statusText = v.status === 'active' ? '活動中' : v.status === 'monitoring' ? '監控中' : '最後偵測';
+  div.innerHTML = `
+    <div>
+      <div class="vc-name">${v.name}</div>
+      <div class="vc-sub">${v.type} · <span class="vessel-status ${v.status}">${statusText}</span></div>
+      <div class="vc-sub" style="font-family:monospace">${v.loc}</div>
+    </div>
+    <div class="vc-right">
+      <div class="vc-days">${v.days}</div>
+      <div class="vc-days-label">天</div>
+    </div>
+  `;
+  vcards.appendChild(div);
+});
+
+// === Threat Level Simulation ===
+function updateThreatLevel(level, score, desc) {
+  const banner = document.getElementById('threat-banner');
+  banner.className = `threat-banner ${level}`;
+  banner.innerHTML = `
+    <div class="threat-dot"></div>
+    <span>威脅等級: ${level} — ${desc}</span>
+    <span style="margin-left:auto;font-size:12px;opacity:0.7">SCORE: ${score}/100</span>
+  `;
+}
+</script>
+</body>
+</html>
