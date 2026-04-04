@@ -84,62 +84,108 @@ class EmailNotifier:
             return None
 
     def _markdown_to_html(self, md_text: str) -> str:
-        """簡易 Markdown 轉 HTML"""
+        """簡易 Markdown 轉 HTML（支援超連結、行內程式碼、有序清單、front matter）"""
         lines = md_text.split('\n')
         html_lines = []
-        in_list = False
+        in_ul = False
+        in_fm = False   # front matter block
 
         for line in lines:
             stripped = line.strip()
 
+            # ── Headings ──
             if stripped.startswith('# '):
-                if in_list:
-                    html_lines.append('</ul>')
-                    in_list = False
-                html_lines.append(f'<h1 style="color:#1a5276;border-bottom:2px solid #2c3e50;">{stripped[2:]}</h1>')
-            elif stripped.startswith('## '):
-                if in_list:
-                    html_lines.append('</ul>')
-                    in_list = False
-                html_lines.append(f'<h2 style="color:#2c3e50;margin-top:20px;">{stripped[3:]}</h2>')
-            elif stripped.startswith('### '):
-                if in_list:
-                    html_lines.append('</ul>')
-                    in_list = False
-                html_lines.append(f'<h3 style="color:#34495e;">{stripped[4:]}</h3>')
-            elif stripped.startswith('- ') or stripped.startswith('* '):
-                if not in_list:
-                    html_lines.append('<ul style="margin-left:20px;">')
-                    in_list = True
-                content = stripped[2:]
-                # Bold
-                while '**' in content:
-                    content = content.replace('**', '<strong>', 1)
-                    content = content.replace('**', '</strong>', 1)
-                html_lines.append(f'<li>{content}</li>')
-            elif stripped.startswith('---'):
-                if in_list:
-                    html_lines.append('</ul>')
-                    in_list = False
-                html_lines.append('<hr style="border:1px solid #bdc3c7;margin:15px 0;">')
-            elif stripped:
-                if in_list:
-                    html_lines.append('</ul>')
-                    in_list = False
-                # Bold
-                while '**' in stripped:
-                    stripped = stripped.replace('**', '<strong>', 1)
-                    stripped = stripped.replace('**', '</strong>', 1)
-                html_lines.append(f'<p>{stripped}</p>')
-            else:
-                if in_list:
-                    html_lines.append('</ul>')
-                    in_list = False
+                self._close_list(html_lines, in_ul); in_ul = False
+                html_lines.append(f'<h1 style="color:#1a5276;border-bottom:2px solid #2c3e50;">{self._inline_md(stripped[2:])}</h1>')
+                continue
+            if stripped.startswith('## '):
+                self._close_list(html_lines, in_ul); in_ul = False
+                html_lines.append(f'<h2 style="color:#2c3e50;margin-top:20px;">{self._inline_md(stripped[3:])}</h2>')
+                continue
+            if stripped.startswith('### '):
+                self._close_list(html_lines, in_ul); in_ul = False
+                html_lines.append(f'<h3 style="color:#34495e;">{self._inline_md(stripped[4:])}</h3>')
+                continue
+            if stripped.startswith('#### '):
+                self._close_list(html_lines, in_ul); in_ul = False
+                html_lines.append(f'<h4 style="color:#566573;">{self._inline_md(stripped[5:])}</h4>')
+                continue
 
-        if in_list:
+            # ── HR ──
+            if stripped.startswith('---'):
+                self._close_list(html_lines, in_ul); in_ul = False
+                html_lines.append('<hr style="border:1px solid #bdc3c7;margin:15px 0;">')
+                continue
+
+            # ── 無序清單 ──
+            if stripped.startswith('- ') or stripped.startswith('* '):
+                if not in_ul:
+                    html_lines.append('<ul style="margin-left:20px;">')
+                    in_ul = True
+                html_lines.append(f'<li>{self._inline_md(stripped[2:])}</li>')
+                continue
+
+            # ── 有序清單  1. / 2. … ──
+            import re as _re
+            ol_m = _re.match(r'^(\d+)\.\s+(.+)', stripped)
+            if ol_m:
+                self._close_list(html_lines, in_ul); in_ul = False
+                html_lines.append(
+                    f'<p style="margin:4px 0 4px 8px;">'
+                    f'<strong>{ol_m.group(1)}.</strong> {self._inline_md(ol_m.group(2))}</p>'
+                )
+                continue
+
+            # ── Front matter 型 key: value（短行） ──
+            fm_m = _re.match(r'^([a-zA-Z_\u4e00-\u9fff]{1,20}):\s+(.+)$', stripped)
+            if fm_m and len(stripped) < 150 and not stripped.startswith('http'):
+                self._close_list(html_lines, in_ul); in_ul = False
+                k, v = fm_m.group(1), fm_m.group(2)
+                html_lines.append(
+                    f'<p style="margin:2px 0;font-size:13px;color:#555;">'
+                    f'<strong style="color:#2c3e50;">{k}</strong>: {self._inline_md(v)}</p>'
+                )
+                continue
+
+            # ── 一般段落 ──
+            if stripped:
+                self._close_list(html_lines, in_ul); in_ul = False
+                html_lines.append(f'<p style="line-height:1.7;">{self._inline_md(stripped)}</p>')
+            else:
+                self._close_list(html_lines, in_ul); in_ul = False
+
+        if in_ul:
             html_lines.append('</ul>')
 
         return '\n'.join(html_lines)
+
+    @staticmethod
+    def _close_list(html_lines: list, in_ul: bool):
+        """如果在清單中，先關閉 </ul>"""
+        if in_ul:
+            html_lines.append('</ul>')
+
+    @staticmethod
+    def _inline_md(text: str) -> str:
+        """行內 Markdown：[text](url) 超連結 / `code` / **bold** / *italic*"""
+        import re
+        # [text](url) → <a href>
+        text = re.sub(
+            r'\[([^\]]+)\]\((https?://[^\)\s]+)\)',
+            r'<a href="\2" style="color:#2980b9;text-decoration:underline;">\1</a>',
+            text
+        )
+        # `code` → <code>
+        text = re.sub(
+            r'`([^`]+)`',
+            r'<code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;font-family:monospace;">\1</code>',
+            text
+        )
+        # **bold**
+        text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+        # *italic*
+        text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', text)
+        return text
 
     def send_report(self, report_path: Path, subject: str = None) -> bool:
         """
@@ -176,6 +222,22 @@ class EmailNotifier:
         msg.attach(MIMEText(report_content, 'plain', 'utf-8'))
 
         # HTML 版（美化）
+        # 解析 front matter（title, date, type, status, author, reviewer）
+        lines = report_content.split('\n')
+        fm_dict = {}
+        body_lines = []
+        fm_parsing = True
+        for line in lines:
+            if fm_parsing and ':' in line and not line.startswith('---') and line.strip() != '':
+                # 只取第一個 ':' 前後作為 key/value
+                key, val = line.split(':', 1)
+                fm_dict[key.strip().lower()] = val.strip()
+                continue
+            else:
+                fm_parsing = False
+                body_lines.append(line)
+        body_md = '\n'.join(body_lines).strip()
+        # 建立 HTML
         html_body = f"""
         <html>
         <body style="font-family:'Microsoft JhengHei','PingFang TC',sans-serif;max-width:800px;margin:0 auto;padding:20px;background:#fafafa;">
@@ -184,15 +246,21 @@ class EmailNotifier:
                 <p style="margin:5px 0 0;opacity:0.8;font-size:14px;">{datetime.now().strftime('%Y-%m-%d %H:%M')} 自動產出</p>
             </div>
             <div style="background:white;padding:20px;border:1px solid #e0e0e0;border-radius:0 0 8px 8px;">
-                {self._markdown_to_html(report_content)}
+                <h2 style="color:#1a5276;">{fm_dict.get('title', '綜合分析報告')}</h2>
+                <p style="margin:2px 0;font-size:13px;color:#555;"><strong style="color:#2c3e50;">date</strong>: {fm_dict.get('date', datetime.now().strftime('%Y-%m-%d'))}</p>
+                <p style="margin:2px 0;font-size:13px;color:#555;"><strong style="color:#2c3e50;">type</strong>: {fm_dict.get('type', '')}</p>
+                <p style="margin:2px 0;font-size:13px;color:#555;"><strong style="color:#2c3e50;">status</strong>: {fm_dict.get('status', '')}</p>
+                <p style="margin:2px 0;font-size:13px;color:#555;"><strong style="color:#2c3e50;">author</strong>: {fm_dict.get('author', '')}</p>
+                <p style="margin:2px 0;font-size:13px;color:#555;"><strong style="color:#2c3e50;">reviewer</strong>: {fm_dict.get('reviewer', '')}</p>
+                <hr style="border:1px solid #bdc3c7;margin:15px 0;"/>
+                {self._markdown_to_html(body_md)}
             </div>
-            <p style="color:#999;font-size:12px;text-align:center;margin-top:20px;">
-                此郵件由中共軍事動態分析系統自動發送
-            </p>
+            <p style="color:#999;font-size:12px;text-align:center;margin-top:20px;">此郵件由中共軍事動態分析系統自動發送</p>
         </body>
         </html>
         """
         msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+
 
         # 發送
         try:
@@ -427,21 +495,37 @@ class Notifier:
         return results
 
 
-# ============= 獨立測試 =============
+# ============= 獨立執行 =============
 if __name__ == "__main__":
+    import argparse
+    import glob
+
+    parser = argparse.ArgumentParser(description="發送分析報告通知")
+    parser.add_argument("--report", type=str, default=None, help="報告 .md 檔案路徑（不指定則自動選最新）")
+    parser.add_argument("--subject", type=str, default=None, help="郵件主題")
+    args = parser.parse_args()
+
     print("=" * 50)
     print("  分析報告通知發送")
     print("=" * 50)
 
     notifier = Notifier()
 
-    # 發送 2026-03-31 完整分析報告
-    report_path = Path(r"C:\Users\garde\OneDrive\3.教務\1.中共軍事體制研究\每日資料蒐集更新\_daily_output\20260331_中共軍事動態綜合分析報告.md")
+    if args.report:
+        report_path = Path(args.report)
+    else:
+        # 自動偵測 _daily_output/ 中最新的綜合分析報告
+        base_dir = Path(__file__).parent / "_daily_output"
+        candidates = sorted(base_dir.glob("*中共軍事動態綜合分析報告.md"), reverse=True)
+        if not candidates:
+            print("❌ 找不到任何綜合分析報告，請確認 _daily_output/ 目錄")
+            exit(1)
+        report_path = candidates[0]
 
     if report_path.exists():
         print(f"📄 發送報告: {report_path.name}")
-        result = notifier.notify_report(report_path, subject="📊 2026-03-31 中共軍事動態綜合分析報告")
-        print(f"\n✅ Email: {'成功' if result['email'] else '失敗'}")
-        print(f"✅ LINE:  {'成功' if result['line'] else '未設定或失敗'}")
+        result = notifier.notify_report(report_path, subject=args.subject)
+        print(f"\n✅ Email: {'成功' if result.get('email') else '失敗'}")
+        print(f"✅ LINE:  {'成功' if result.get('line') else '未設定或失敗'}")
     else:
         print(f"❌ 報告檔案不存在: {report_path}")
