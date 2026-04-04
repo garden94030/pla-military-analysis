@@ -1,4 +1,31 @@
 {
+  "_comment": "🛡️ PLA 情報聯合作戰中心 — Claude Code 全域設定 (v2.1)",
+  "_comment_permissions": "dangerouslySkipPermissions=true 對應 CLI flag: claude --dangerously-skip-permissions",
+
+  "dangerouslySkipPermissions": true,
+
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "TodoWrite(*)",
+      "mcp__Desktop_Commander__*",
+      "mcp__b13b1317-b8fd-462b-a7d3-27fbb8ac8539__*",
+      "mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__*",
+      "mcp__2b2ab932-041f-4f4f-bb00-adcebaf3ef64__*",
+      "mcp__efb38a5b-967f-4430-92d9-e3cdd581db9e__*",
+      "mcp__PDF_Tools_-_Fill__Analyze__Extract__View__*",
+      "mcp__PDF__By_Anthropic___*"
+    ],
+    "deny": []
+  },
+
   "hooks": {
     "PostToolUse": [
       {
