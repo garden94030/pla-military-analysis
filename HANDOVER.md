@@ -1,6 +1,6 @@
 # HANDOVER.md — 交接文件
 
-**最後更新**：2026-04-05 06:00（台北時間 UTC+8）
+**最後更新**：2026-04-05 22:30（台北時間 UTC+8）
 **本輪執行類型**：人工互動 + Bug 修復
 **執行模型**：Claude Sonnet 4.6
 
@@ -79,10 +79,21 @@
 ## 附錄：Git Log（最近 6 筆）
 
 ```
+f321095  feat: LINE Bot 新增 Dispatch 指令 — !立即分析 / !狀態 / !說明
+7406179  docs: 更新 HANDOVER.md — notifier Bug修復記錄 + Dispatch評估
 0cae43a  feat: LINE 通知改送完整綜合分析報告內容（去除 Markdown 語法）
 b66a34c  fix: notifier.py 支援 --report/--subject 參數並自動偵測最新報告
 f72ccf2  feat: 20260405 每日自動化分析全面完成 — 10議題+綜合報告+HANDOVER
 ec08ae6  feat: 20260405 議題07-10四份深度分析報告全面完成
-a6261f3  feat: 20260405 議題04/05/06 三份深度分析報告完成
-a4327af  feat: 20260405 三份深度分析報告 — AI蜂群/預算僵局/96A戰車APS升級
 ```
+
+---
+
+## 5. NotebookLM MCP 整合狀態（2026-04-05 新增）
+
+- **安裝版本**：notebooklm-mcp-cli 0.5.16
+- **連線帳號**：garden94030@gmail.com
+- **MCP 狀態**：`claude mcp list` 顯示 `notebooklm-mcp: ✓ Connected`
+- **本地資料夾**：`C:\Users\garde\Documents\NotebookLM\`（slides/infographics/audio/video/docs/sheets/mindmaps/quizzes）
+- **筆記本總數**：99 本（owned: 95、shared: 4）
+- **已完成功能測試**：建立並刪除測試筆記本，端對端流程正常
